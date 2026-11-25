@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#1aa6e4">
+  <title>B.I. Bank - Banco do jogo</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="B.I. Bank">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="conn" class="conn" hidden>Sem conexão. Tentando reconectar…</div>
+  <div id="boot" class="boot" hidden>Conectando à sala…</div>
+
+  <main id="screen-join" class="screen">
+    <header class="hero hero-join">
+      <h1>B.I. Bank</h1>
+      <p>O banco da partida, no celular de cada jogador.</p>
+    </header>
+    <section class="card join-card">
+      <label class="field">Código da sala
+        <div class="row">
+          <input id="code" maxlength="8" autocapitalize="characters" autocomplete="off" placeholder="Ex.: K7M2Q">
+          <button id="btn-create" type="button" class="btn alt small">Nova sala</button>
+        </div>
+      </label>
+      <div class="seg" id="role-seg">
+        <button type="button" data-role="player" class="on">Jogador</button>
+        <button type="button" data-role="bank">Banco</button>
+      </div>
+      <div id="profiles-wrap" hidden>
+        <p class="hint">Já estão na sala. Toque no seu nome para reconectar.</p>
+        <div id="profiles" class="chips"></div>
+      </div>
+      <label class="field" id="name-field">Seu nome
+        <input id="name" maxlength="20" autocomplete="nickname" placeholder="Ex.: Ana">
+      </label>
+      <p id="join-error" class="error" role="alert"></p>
+      <button id="btn-join" class="btn" type="button">Entrar na sala</button>
+    </section>
+  </main>
+
+  <main id="screen-app" class="screen" hidden>
+    <header class="hero">
+      <div class="topbar">
+        <button id="btn-code" class="room-pill" type="button" aria-label="Copiar link da sala">Sala <b id="room-code"></b></button>
+        <button id="btn-menu" class="icon-btn" type="button" aria-label="Menu da sala">⋯</button>
+      </div>
+    </header>
+    <section id="balance" class="card balance-card"></section>
+    <section id="actions" class="actions"></section>
+    <button id="btn-undo" class="btn ghost undo" type="button">Desfazer última transação</button>
+    <section id="pending"></section>
+    <h2 class="sec">Jogadores</h2>
+    <section id="players" class="card list"></section>
+    <h2 class="sec">Extrato</h2>
+    <section id="statement" class="card list"></section>
+  </main>
+
+  <div id="overlay" class="overlay"></div>
+
+  <form id="sheet" class="sheet" autocomplete="off">
+    <div class="grab"></div>
+    <h3 id="sheet-title"></h3>
+    <div id="pick-from" class="pick"></div>
+    <div id="pick-to" class="pick"></div>
+    <label class="amount"><span>R$</span><input id="amount" inputmode="numeric" pattern="[0-9]*" placeholder="0" aria-label="Valor"></label>
+    <div id="quick" class="chips center"></div>
+    <input id="desc" class="plain" maxlength="80" placeholder="Descrição (opcional)">
+    <p id="sheet-error" class="error" role="alert"></p>
+    <button id="sheet-ok" class="btn" type="submit">Confirmar</button>
+  </form>
+
+  <section id="menu" class="sheet">
+    <div class="grab"></div>
+    <h3>Menu da sala</h3>
+    <div class="menu-grid">
+      <button id="m-export" class="btn alt" type="button">Salvar / Exportar JSON</button>
+      <button id="m-import" class="btn alt" type="button">Importar JSON</button>
+    </div>
+    <form id="settings" hidden>
+      <h4>Configurações do Banco</h4>
+      <div class="row">
+        <label class="field">Saldo inicial<input id="set-start" inputmode="numeric"></label>
+        <label class="field">Salário por volta<input id="set-salary" inputmode="numeric"></label>
+      </div>
+      <p class="hint">O saldo inicial vale apenas para novos jogadores.</p>
+      <button class="btn small" type="submit">Salvar configurações</button>
+      <p class="hint">Remover jogador</p>
+      <div id="remove-list" class="chips"></div>
+    </form>
+    <button id="m-leave" class="btn ghost" type="button">Sair da sala</button>
+  </section>
+
+  <div id="flash" class="flash" aria-live="polite">
+    <svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24"/><path d="M15 27l8 8 15-17"/></svg>
+    <b id="flash-title"></b><span id="flash-text"></span>
+  </div>
+  <div id="toast" class="toast" role="status"></div>
+  <input id="file" type="file" accept="application/json,.json" hidden>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
