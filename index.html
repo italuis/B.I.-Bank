@@ -1,0 +1,1906 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#5086c1">
+  <title>B.I. Bank - Banco do jogo</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="B.I. Bank">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="B.I. Bank">
+  <style>
+:root {
+  --ink: #0b3552; --muted: #55768c; --page: #eef9ff;
+  --aqua: #1aa6e4; --deep: #0a6fb0; --leaf: #1fa062; --leaf-d: #15804c;
+  --coral: #d64560; --amber: #f2a33a;
+  --glass: rgba(255,255,255,.8); --line: rgba(30,130,190,.18);
+  --shadow: 0 10px 28px rgba(14,100,160,.15); --r: 22px;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; }
+body {
+  font-family: Frutiger, "Segoe UI", "SF Pro Rounded", system-ui, sans-serif;
+  color: var(--ink); background: var(--page); min-height: 100dvh; font-size: 16px;
+}
+[hidden] { display: none !important; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid #7fd3f7; outline-offset: 2px; }
+.screen { max-width: 480px; margin: 0 auto; padding-bottom: calc(40px + env(safe-area-inset-bottom)); }
+
+/* Hero com onda suave (único elemento orgânico de destaque) */
+.hero {
+  background: linear-gradient(160deg, #35bdf0 0%, #0f84ca 100%);
+  color: #fff; padding: calc(14px + env(safe-area-inset-top)) 18px 84px; position: relative;
+}
+.hero::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 40px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 40' preserveAspectRatio='none'%3E%3Cpath fill='%23eef9ff' d='M0 24C80 4 150 4 240 20S400 38 480 14V40H0Z'/%3E%3C/svg%3E") bottom/100% 100% no-repeat;
+}
+.hero-join { padding-bottom: 96px; }
+.hero-join h1 { margin: 22px 0 6px; font-size: 30px; letter-spacing: -.5px; }
+.hero-join p { margin: 0; opacity: .92; }
+.topbar { display: flex; justify-content: space-between; align-items: center; }
+.room-pill, .icon-btn {
+  border: 1px solid rgba(255,255,255,.55); background: rgba(255,255,255,.2); color: #fff;
+  border-radius: 999px; padding: 8px 14px; backdrop-filter: blur(6px);
+}
+.room-pill b { letter-spacing: 1.5px; margin-left: 4px; }
+.icon-btn { font-size: 20px; line-height: 1; padding: 6px 14px 10px; }
+
+.card {
+  background: var(--glass); backdrop-filter: blur(10px); border: 1px solid #fff;
+  border-radius: var(--r); box-shadow: var(--shadow); padding: 16px;
+}
+.join-card { margin: -64px 16px 0; position: relative; display: grid; gap: 14px; }
+.balance-card { margin: -58px 16px 0; position: relative; overflow: hidden; text-align: center; padding: 20px 16px 18px; }
+.balance-card::before {
+  content: ""; position: absolute; inset: 0 0 45% 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(120,215,255,.28), rgba(255,255,255,0));
+}
+.who { margin: 0; color: var(--muted); font-weight: 600; position: relative; }
+.amount-big { margin: 4px 0 2px; font-size: 44px; font-weight: 800; color: var(--deep); letter-spacing: -1px; position: relative; }
+.amount-big.neg { color: var(--coral); }
+.sub { margin: 0; color: var(--muted); font-size: 14px; position: relative; }
+
+.actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 16px 0; }
+.act {
+  border: 1px solid #fff; background: var(--glass); border-radius: 18px; padding: 12px 4px 10px;
+  box-shadow: 0 6px 16px rgba(14,100,160,.1); display: grid; gap: 6px; justify-items: center;
+  font-weight: 600; font-size: 14px; color: var(--ink);
+}
+.act:active { transform: scale(.97); }
+.act i {
+  font-style: normal; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center;
+  color: #fff; font-size: 20px; background: linear-gradient(180deg, #3cc3f4, #0e86cc);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.45);
+}
+.act.main i { background: linear-gradient(180deg, #2fbd79, var(--leaf-d)); }
+.undo { margin: 12px 16px 0; width: calc(100% - 32px); }
+.sec { margin: 22px 20px 8px; font-size: 17px; }
+.list { margin: 0 16px; padding: 4px 14px; }
+.empty { color: var(--muted); text-align: center; padding: 18px 0; margin: 0; }
+
+.row-item { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line); width: 100%; background: none; border-left: 0; border-right: 0; border-top: 0; text-align: left; }
+.row-item:last-child { border-bottom: 0; }
+.avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 700; flex: none; }
+.grow { flex: 1; min-width: 0; }
+.grow b, .grow small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grow small { color: var(--muted); font-size: 13px; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #b8c9d4; margin-right: 6px; }
+.dot.on { background: var(--leaf); }
+.val { text-align: right; font-weight: 700; white-space: nowrap; }
+.val small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; }
+.pos { color: var(--leaf-d); } .neg { color: var(--coral); }
+.undone .grow, .undone .val { opacity: .5; text-decoration: line-through; }
+.undone .tag { text-decoration: none; }
+.tag { font-size: 11px; color: var(--amber); font-weight: 700; }
+
+.charge { margin: 14px 16px 0; display: grid; gap: 10px; border-left: 5px solid var(--amber); }
+.charge p { margin: 0; }
+.charge .btns { display: flex; gap: 8px; }
+
+/* Controles */
+.btn {
+  border: 0; border-radius: 16px; padding: 15px 18px; font-weight: 700; font-size: 16px; color: #fff;
+  background: linear-gradient(180deg, #25a96a, var(--leaf-d)); box-shadow: 0 6px 14px rgba(21,128,76,.25), inset 0 1px 0 rgba(255,255,255,.35);
+}
+.btn.alt { background: linear-gradient(180deg, #2aa9e6, #0c78bb); box-shadow: 0 6px 14px rgba(12,120,187,.22), inset 0 1px 0 rgba(255,255,255,.35); }
+.btn.ghost { background: #fff; color: var(--deep); border: 1.5px solid var(--line); box-shadow: none; }
+.btn.small { padding: 11px 14px; font-size: 15px; }
+.btn:disabled { opacity: .45; box-shadow: none; }
+.btn:active:not(:disabled) { transform: scale(.98); }
+.field { display: grid; gap: 6px; font-weight: 600; font-size: 14px; color: var(--muted); }
+.field input, .plain, .amount input {
+  border: 1.5px solid var(--line); background: #fff; border-radius: 14px; padding: 13px 14px; width: 100%; color: var(--ink);
+}
+.field input:focus, .plain:focus { border-color: var(--aqua); outline: none; box-shadow: 0 0 0 3px rgba(26,166,228,.2); }
+#code { text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
+.row { display: flex; gap: 10px; align-items: stretch; } .row > .field { flex: 1; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; background: #dff1fb; border-radius: 14px; padding: 4px; }
+.seg button { border: 0; background: none; border-radius: 11px; padding: 10px; font-weight: 700; color: var(--muted); }
+.seg .on { background: #fff; color: var(--deep); box-shadow: 0 2px 8px rgba(14,100,160,.15); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; } .chips.center { justify-content: center; }
+.chip { border: 1.5px solid var(--line); background: #fff; border-radius: 999px; padding: 9px 14px; font-weight: 600; }
+.chip.on { background: var(--aqua); border-color: var(--aqua); color: #052a44; }
+.chip:disabled { opacity: 1; }
+.hint { margin: 0 0 8px; color: var(--muted); font-size: 14px; }
+.error { margin: 0; color: var(--coral); font-weight: 600; min-height: 0; font-size: 14px; }
+.error:empty { display: none; }
+
+/* Sheets */
+.overlay { position: fixed; inset: 0; background: rgba(8,50,80,.42); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 20; }
+.overlay.open { opacity: 1; pointer-events: auto; }
+.sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; max-width: 480px; margin: 0 auto; z-index: 30;
+  background: #fff; border-radius: 26px 26px 0 0; padding: 10px 18px calc(20px + env(safe-area-inset-bottom));
+  max-height: 92dvh; overflow-y: auto; display: grid; gap: 12px;
+  transform: translateY(105%); transition: transform .25s ease; box-shadow: 0 -10px 40px rgba(8,50,80,.25);
+}
+.sheet.open { transform: none; }
+.sheet h3 { margin: 0; font-size: 20px; } .sheet h4 { margin: 4px 0 8px; }
+.grab { width: 44px; height: 5px; border-radius: 9px; background: #cfe4f1; margin: 0 auto; }
+.pick { display: grid; gap: 6px; } .pick-label { font-size: 14px; font-weight: 600; color: var(--muted); }
+.amount { display: flex; align-items: center; gap: 8px; border: 1.5px solid var(--line); border-radius: 18px; padding: 4px 14px; background: #f6fcff; }
+.amount span { font-weight: 700; color: var(--muted); font-size: 22px; }
+.amount input { border: 0; background: none; font-size: 36px; font-weight: 800; padding: 8px 0; color: var(--deep); }
+.amount input:focus { outline: none; box-shadow: none; }
+.menu-grid { display: grid; gap: 10px; }
+#settings { display: grid; gap: 10px; }
+
+/* Feedback */
+.conn { position: fixed; top: 0; left: 0; right: 0; z-index: 60; background: var(--amber); color: #3a2400; text-align: center; padding: calc(8px + env(safe-area-inset-top)) 12px 8px; font-weight: 700; font-size: 14px; }
+.boot { min-height: 100dvh; display: grid; place-items: center; color: var(--muted); font-weight: 600; }
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translate(-50%, 20px); background: #0b3552; color: #fff; padding: 12px 18px; border-radius: 14px; opacity: 0; pointer-events: none; transition: .25s; z-index: 70; max-width: 90vw; text-align: center; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.flash { position: fixed; inset: 0; margin: auto; width: 230px; height: 210px; background: rgba(255,255,255,.96); border-radius: 26px; box-shadow: var(--shadow); display: grid; place-items: center; align-content: center; gap: 4px; text-align: center; padding: 16px; z-index: 80; opacity: 0; pointer-events: none; transform: scale(.9); transition: .2s; }
+.flash.show { opacity: 1; transform: none; }
+.flash svg { width: 64px; height: 64px; fill: none; stroke: var(--leaf); stroke-width: 3; }
+.flash svg path { stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 40; stroke-dashoffset: 40; }
+.flash.show svg path { animation: draw .4s .1s forwards; }
+.flash span { color: var(--muted); font-size: 14px; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } .flash svg path { stroke-dashoffset: 0; } }
+
+</style>
+
+<style>
+/* Tela de entrada no estilo de login bancário */
+.hero-join { padding: calc(30px + env(safe-area-inset-top)) 24px 112px; text-align: center; }
+.hero-join .brand { display: inline-grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; background: rgba(255,255,255,.22); font-weight: 800; font-size: 18px; letter-spacing: .5px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,.5); }
+.hero-join h1 { font-size: 24px; margin: 0; letter-spacing: 0; }
+.hero-join p { font-size: 14px; margin-top: 4px; }
+.join-card { margin: -84px 20px 0; padding: 24px 20px 20px; border-radius: 24px; background: #fff; box-shadow: 0 16px 40px rgba(14,100,160,.2); gap: 16px; }
+.join-card .field { font-size: 13px; color: var(--ink); }
+.join-card .field input { background: #f5fafd; border: 1.5px solid #d3e7f4; border-radius: 14px; padding: 14px; font-size: 16px; }
+.join-card .seg { background: #eef5f9; }
+.join-card .btn { padding: 16px; border-radius: 14px; font-size: 17px; margin-top: 4px; }
+.join-foot { text-align: center; color: var(--muted); font-size: 12px; margin: 18px 24px 0; line-height: 1.5; }
+</style>
+<style>.avatar{overflow:hidden}.avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover}.photo-btn{background:none;border:0;padding:0;margin:0 auto 8px;display:block;cursor:pointer;position:relative;z-index:1}.photo-btn .avatar{width:68px;height:68px;font-size:26px;margin:0 auto;box-shadow:0 4px 12px rgba(10,111,176,.25);border:3px solid #fff}</style>
+<style>
+.theme-btn{position:absolute;top:calc(12px + env(safe-area-inset-top));right:14px;z-index:2;width:40px;height:40px;padding:0;font-size:18px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.2);border-radius:999px;cursor:pointer;color:#fff}
+.theme-btn.in-bar{position:static;margin-right:8px}
+html[data-theme="dark"]{color-scheme:dark;--ink:#e6f3fb;--muted:#9fb8c9;--page:#0d1b2a;--glass:rgba(22,40,58,.88);--line:rgba(120,190,230,.22);--sheet:#13263a;--field:#0f2236;--chip:#16304a}
+html[data-theme="dark"] body{background:var(--page);color:var(--ink)}
+html[data-theme="dark"] .field input,html[data-theme="dark"] .plain,html[data-theme="dark"] .amount input,html[data-theme="dark"] .join-card .field input{background:var(--field);color:var(--ink);border-color:var(--line)}
+html[data-theme="dark"] .amount{background:var(--field)}
+html[data-theme="dark"] .amount input{color:#7fd3f7}
+html[data-theme="dark"] .sheet,html[data-theme="dark"] .join-card{background:var(--sheet)}
+html[data-theme="dark"] .seg{background:var(--field)}
+html[data-theme="dark"] .seg .on{background:#1d3b56;color:var(--ink)}
+html[data-theme="dark"] .chip{background:var(--chip);color:var(--ink)}
+html[data-theme="dark"] .chip.on{background:#1aa6e4;color:#04243a}
+html[data-theme="dark"] .btn.ghost{background:var(--chip);color:#7fd3f7}
+html[data-theme="dark"] .act{background:var(--glass);color:var(--ink)}
+html[data-theme="dark"] .balance-card::before{background:linear-gradient(180deg,rgba(40,140,200,.25),rgba(0,0,0,0))}
+html[data-theme="dark"] .amount-big{color:#7fd3f7}
+html[data-theme="dark"] .flash{background:var(--sheet)}
+html[data-theme="dark"] .flash svg{stroke:#3ed98f}
+html[data-theme="dark"] .toast{background:#e6f3fb;color:#0d1b2a}
+html[data-theme="dark"] .grab{background:#35556e}
+html[data-theme="dark"] .overlay{background:rgba(0,0,0,.6)}
+html[data-theme="dark"] .photo-btn .avatar{border-color:#13263a}
+html[data-theme="dark"] .hero::after{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 40' preserveAspectRatio='none'%3E%3Cpath fill='%230d1b2a' d='M0 24C80 4 150 4 240 20S400 38 480 14V40H0Z'/%3E%3C/svg%3E") bottom/100% 100% no-repeat}
+html[data-theme="dark"] .card{border-color:rgba(120,190,230,.15)}
+html[data-theme="dark"] .room-pill,html[data-theme="dark"] .icon-btn{background:rgba(255,255,255,.12)}
+html[data-theme="dark"] .error{color:#ff8fa3}
+.actions{display:grid;grid-template-columns:1fr;gap:20px;margin:16px 16px 0}
+.group{display:grid;gap:10px}
+.group-title{margin:0 4px;font-size:14px;font-weight:700;color:var(--muted)}
+.grid3{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.act{padding:14px 6px 12px}
+.sheet{touch-action:pan-y}
+/* QR Code */
+.qr-note{text-align:center;margin:0}
+.qr-card{display:grid;justify-items:center;gap:6px;text-align:center}
+.qr-card b{font-size:20px;color:var(--ink)}
+.qr-card .hint{margin:0}
+.qr-box{background:#fff;padding:14px;border-radius:20px;box-shadow:var(--shadow);width:min(100%,290px);min-height:200px;display:grid;place-items:center}
+.qr-box img,.qr-box canvas{max-width:100%;height:auto;display:block;image-rendering:pixelated}
+.scan-frame{position:relative;width:min(100%,340px);aspect-ratio:1/1;margin:0 auto;border-radius:22px;overflow:hidden;background:#0b1d2b}
+.scan-frame video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.scan-frame::after{content:"";position:absolute;inset:14%;border:3px solid rgba(255,255,255,.92);border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.28);pointer-events:none}
+.scan-line{position:absolute;left:16%;right:16%;top:16%;height:2px;background:rgba(255,255,255,.85);box-shadow:0 0 8px rgba(255,255,255,.8);animation:scanmove 2s ease-in-out infinite alternate;pointer-events:none;z-index:1}
+@keyframes scanmove{from{top:16%}to{top:84%}}
+.scan-ph{position:absolute;inset:0;margin:0;padding:24px;display:grid;place-items:center;text-align:center;color:#d8ecf8;font-weight:600;font-size:15px;z-index:2}
+.scan-ph[hidden]{display:none}
+.scan-manual{display:grid;gap:10px}
+.scan-row{display:grid;grid-template-columns:1fr auto;gap:8px}
+#qr-form{display:grid;gap:12px}
+#qr-make{width:100%}
+.coin{position:fixed;left:0;top:0;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;color:#6b4300;background:radial-gradient(circle at 35% 30%,#fff6c2 0%,#ffd84d 35%,#e0a21b 80%,#b9790f 100%);box-shadow:0 4px 10px rgba(0,0,0,.35),inset 0 -3px 0 rgba(0,0,0,.15);z-index:90;pointer-events:none;will-change:transform,opacity;border:2px solid #fff3b0}
+.qr-hero{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 4px}
+.qr-hero button{border:0;border-radius:22px;padding:18px 12px 16px;color:#fff;font-weight:800;font-size:16px;line-height:1.2;display:grid;justify-items:center;gap:8px;box-shadow:0 10px 24px rgba(12,120,187,.28),inset 0 1px 0 rgba(255,255,255,.4);background:linear-gradient(160deg,#2fbd79,#0f8a52);position:relative;overflow:hidden}
+.qr-hero button.scan{background:linear-gradient(160deg,#35b7f0,#0a6fb0)}
+.qr-hero button::after{content:"";position:absolute;inset:-40% -60% auto auto;width:70%;padding-top:70%;border-radius:50%;background:rgba(255,255,255,.18);pointer-events:none}
+.qr-hero i{font-style:normal;font-size:30px;line-height:1}
+.qr-hero small{font-weight:600;font-size:12px;opacity:.9}
+.qr-hero button:active{transform:scale(.97)}
+.act.sec{grid-column:1/-1;flex-direction:row;justify-content:center;gap:8px;background:transparent;box-shadow:none;border:1.5px dashed var(--line);padding:10px 6px;font-size:13px;color:var(--muted)}
+.act.sec i{background:none;color:var(--muted);box-shadow:none;width:auto;height:auto;font-size:16px;margin-bottom:2px}
+@media (prefers-reduced-motion: reduce){.qr-hero button:active{transform:none}}
+.qr-hero.single{grid-template-columns:1fr}
+.opt-row{display:grid;gap:6px;font-size:14px;font-weight:600;margin:4px 0}
+.opt-row select{padding:12px;border-radius:14px}
+.pix-tag{display:inline-block;padding:4px 12px;border-radius:999px;background:linear-gradient(160deg,#2fbd79,#0f8a52);color:#fff;font-weight:800;font-size:12px;letter-spacing:.6px;box-shadow:0 4px 10px rgba(15,138,82,.3);justify-self:center}
+.qr-box.glow{box-shadow:0 0 0 6px rgba(47,189,121,.22),0 14px 34px rgba(12,120,187,.25)}
+.pending-qr{display:grid;justify-items:center;gap:8px;margin:10px 0 4px}
+.pending-qr .qr-box{width:200px;min-height:200px;padding:10px}
+/* Abas inferiores */
+.screen{padding-bottom:calc(104px + env(safe-area-inset-bottom))!important}
+.balance-card{position:sticky;top:8px;z-index:20;padding:12px 16px 12px!important}
+.balance-card .amount-big{font-size:34px!important;margin:2px 0!important}
+.balance-card .sub{margin:2px 0 0!important}
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(480px,100%);z-index:25;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px 12px calc(8px + env(safe-area-inset-bottom));background:var(--glass,rgba(255,255,255,.92));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line)}
+.tab{border:0;background:none;color:var(--muted);font:inherit;font-size:12px;font-weight:700;display:grid;justify-items:center;gap:2px;padding:6px 0;border-radius:14px;cursor:pointer;transition:background .2s,color .2s}
+.tab i{font-style:normal;font-size:20px;line-height:1}
+.tab.on{color:var(--deep,#0b5c8f);background:rgba(120,190,235,.22)}
+.tab:active{transform:scale(.97)}
+.tab-pane[hidden]{display:none}
+.toast{bottom:calc(96px + env(safe-area-inset-bottom))!important}
+@media (prefers-reduced-motion: reduce){.tab{transition:none}}
+@media (prefers-reduced-motion: reduce){.scan-line{display:none}}
+</style>
+<style>img.brand{width:64px;height:64px;border-radius:18px;object-fit:cover;margin-bottom:10px;border:0;background:none}.sec-row{display:flex;align-items:center;justify-content:space-between;margin:22px 20px 8px}
+.sec-row .sec{margin:0}
+.mini-btn{border:0;border-radius:999px;padding:8px 14px;font-weight:700;font-size:14px;color:#fff;background:linear-gradient(180deg,#2aa9e6,#0c78bb);box-shadow:0 4px 10px rgba(12,120,187,.25)}
+.props-grid{display:grid;gap:12px;margin:0 16px}
+.pcard{border:1px solid #fff;background:var(--glass);border-radius:20px;box-shadow:0 6px 18px rgba(14,100,160,.12);padding:14px 14px 12px 16px;text-align:left;display:grid;gap:10px;width:100%;border-left:6px solid #b8c9d4;cursor:pointer;color:var(--ink)}
+.pcard.owned{border-left-color:var(--aqua)}
+.pcard.mine{border-left-color:var(--leaf)}
+.pcard-top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.pcard-top b{font-size:16px}
+.pill{font-style:normal;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:#e6f4fb;color:var(--deep);white-space:nowrap}
+.pcard.mine .pill{background:#dcf5e8;color:var(--leaf-d)}
+.pcard-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-weight:700;font-size:15px}
+.pcard-stats small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.pcard-foot{color:var(--muted);font-size:12px}
+.swatches{display:flex;flex-wrap:wrap;gap:10px}
+.swatch{width:34px;height:34px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.22);cursor:pointer;padding:0}
+.swatch.on{outline:3px solid var(--aqua);outline-offset:2px}
+.rs-total{margin:0;font-size:28px;font-weight:800;color:var(--deep);text-align:center}
+.pcard .pcolor{width:12px;height:12px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:middle;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+html[data-theme="dark"] .pill{background:#16304a;color:#7fd3f7}
+html[data-theme="dark"] .pcard.mine .pill{background:#14402c;color:#3ed98f}
+</style>
+<style>
+/* Toque Frutiger Aero (sutil): brilho nos botões, vidro nos cartões, céu leve no fundo */
+html:not([data-theme="dark"]) body{
+  background:
+    radial-gradient(circle at 12% 4%, rgba(255,255,255,.95) 0 14%, transparent 15%),
+    radial-gradient(circle at 92% 18%, rgba(160,230,255,.55) 0 22%, transparent 23%),
+    radial-gradient(ellipse at 50% 110%, rgba(120,210,255,.45) 0 45%, transparent 46%),
+    linear-gradient(180deg, #d9f2ff 0%, #eef9ff 55%, #f6fcff 100%);
+  background-attachment: fixed;
+}
+html:not([data-theme="dark"]) .hero{
+  background:
+    radial-gradient(circle at 88% 0%, rgba(255,255,255,.42) 0 18%, transparent 19%),
+    radial-gradient(circle at 6% 30%, rgba(255,255,255,.2) 0 12%, transparent 13%),
+    linear-gradient(170deg, #4fc8f5 0%, #1496dc 60%, #0c76bb 100%);
+}
+.btn, .mini-btn, .act i, .chip.on{ position: relative; overflow: hidden; }
+.btn::after, .mini-btn::after{
+  content:""; position:absolute; left:6%; right:6%; top:3%; height:46%; border-radius:999px;
+  background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.05));
+  pointer-events:none;
+}
+.btn{ box-shadow: 0 6px 14px rgba(14,100,160,.22), inset 0 1px 0 rgba(255,255,255,.55), inset 0 -2px 0 rgba(0,40,80,.12); }
+.btn.alt{ background: linear-gradient(180deg, #4ccbff 0%, #1592de 55%, #0b72b8 100%); }
+.btn.ghost{ background: linear-gradient(180deg, #ffffff, #eaf6fd); }
+.btn.ghost::after{ display:none; }
+.act i{ box-shadow: inset 0 2px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(0,50,90,.18), 0 4px 10px rgba(12,110,180,.25); }
+.act i::after{
+  content:""; position:absolute; left:14%; right:14%; top:6%; height:42%; border-radius:50%;
+  background: linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,0));
+}
+.act i{ position: relative; }
+.card, .pcard, .act{
+  background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.72));
+  box-shadow: 0 10px 28px rgba(14,100,160,.16), inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(255,255,255,.6);
+}
+.balance-card{ background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(230,247,255,.8)); }
+.mini-btn{ background: linear-gradient(180deg, #4ccbff 0%, #1592de 55%, #0b72b8 100%); box-shadow: 0 4px 10px rgba(12,120,187,.25), inset 0 1px 0 rgba(255,255,255,.6); }
+.sheet{ background: linear-gradient(180deg, #ffffff, #f1faff); box-shadow: 0 -10px 40px rgba(8,50,80,.22), inset 0 1px 0 #fff; }
+.grab{ background: linear-gradient(90deg, #b9dff2, #7fc4e8); }
+.pill{ background: linear-gradient(180deg, #f2faff, #d6effc); box-shadow: inset 0 1px 0 #fff; }
+html[data-theme="dark"] .card, html[data-theme="dark"] .pcard, html[data-theme="dark"] .act{ background: var(--glass); box-shadow: 0 10px 28px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06); }
+</style>
+<style>
+/* Logo da tela inicial sem caixa, borda ou espaçamento */
+.hero-join{ padding-top: calc(18px + env(safe-area-inset-top)); }
+.hero-join img.brand{ width:72px; height:72px; background:none; border:0; border-radius:0; padding:0; margin:0 auto 6px; box-shadow:none; display:block; }
+</style>
+<style>
+.result{position:fixed;inset:0;background:rgba(8,50,80,.5);display:grid;place-items:center;padding:16px;z-index:90}
+.result[hidden]{display:none}
+.result-card{background:var(--sheet, #fff);width:100%;max-width:440px;max-height:90dvh;overflow:auto;border-radius:24px;padding:20px;display:grid;gap:12px;box-shadow:0 20px 50px rgba(8,50,80,.3)}
+.result-card h2{margin:0;font-size:22px}
+.rank{border:1px solid var(--line);border-radius:16px;padding:12px 14px;background:var(--glass);display:grid;gap:6px}
+.rank-head{display:flex;justify-content:space-between;font-weight:800;font-size:16px}
+.rank small{color:var(--muted)}
+.rank ul{margin:4px 0 0;padding-left:18px;font-size:14px;line-height:1.5}
+</style>
+<style>
+.turn-card{border-left:5px solid var(--amber);display:grid;gap:10px}
+.turn-card p{margin:0}
+.turn-card.mine{border-left-color:var(--leaf)}
+.locked .act,.locked .qr-hero button[data-qr="make"]{opacity:.45;pointer-events:none}
+.locked .qr-hero button[data-qr="scan"]{opacity:1}
+.drawer{border:1px solid var(--line);border-radius:14px;padding:10px 14px;background:#fff}
+.drawer summary{font-weight:700;cursor:pointer;list-style:none}
+.drawer summary::-webkit-details-marker{display:none}
+.drawer summary::before{content:"▸ ";color:var(--muted)}
+.drawer[open] summary::before{content:"▾ "}
+.drawer .chips{margin-top:10px}
+</style>
+<style>
+.turn-card{margin:12px 16px 0;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-radius:14px;background:rgba(255,255,255,.55);border:1px solid var(--line);box-shadow:none;font-size:13px;color:var(--muted)}
+.turn-card p{margin:0}
+.turn-card.mine{border-color:rgba(31,160,98,.35);color:var(--leaf-d);font-weight:700}
+.turn-next{border:0;border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;font-weight:700;color:var(--deep);background:#fff;border:1px solid var(--line);cursor:pointer}
+.veil{position:fixed;inset:0;background:rgba(90,110,130,.22);pointer-events:none;z-index:15;transition:opacity .2s}
+.veil[hidden]{display:none}
+html[data-theme="dark"] .turn-card{background:rgba(22,40,58,.6)}
+html[data-theme="dark"] .turn-next{background:var(--chip);color:#7fd3f7}
+</style>
+<style>
+.sec-toggle{border:0;background:none;padding:0;font:inherit;font-size:17px;font-weight:700;color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:6px}
+.chev{display:inline-block;transition:transform .2s}
+.sec-toggle[aria-expanded="false"] .chev{transform:rotate(-90deg)}
+.props-search{margin:0 16px 12px;width:calc(100% - 32px)}
+</style>
+</head>
+<body>
+  <div id="conn" class="conn" hidden>Sem conexão. Tentando reconectar…</div>
+  <div id="boot" class="boot" hidden>Conectando à sala…</div>
+
+  <main id="screen-join" class="screen">
+    <header class="hero hero-join">
+      <button type="button" class="theme-btn" aria-label="Alternar modo escuro">🌙</button>
+      <img class="brand" src="/logo-hd.png" alt="Logo B.I. Bank">
+      <h1>B.I. Bank</h1>
+      <p>Acesse sua conta da partida</p>
+    </header>
+    <section class="card join-card">
+      <label class="field">Código da sala
+        <div class="row">
+          <input id="code" maxlength="8" autocapitalize="characters" autocomplete="off" placeholder="Ex.: K7M2Q">
+          <button id="btn-create" type="button" class="btn alt small">Criar como Banco</button>
+        </div>
+      </label>
+      <div class="seg" id="role-seg">
+        <button type="button" data-role="player" class="on">Jogador</button>
+        <button type="button" data-role="bank">Banco</button>
+      </div>
+      <div id="profiles-wrap" hidden>
+        <p class="hint">Já estão na sala. Toque no seu nome para reconectar.</p>
+        <div id="profiles" class="chips"></div>
+      </div>
+      <label class="field" id="name-field">Seu nome
+        <input id="name" maxlength="20" autocomplete="nickname" placeholder="Ex.: Ana">
+      </label>
+      <p id="name-hint" class="hint" hidden>Opcional. Deixe em branco para só administrar o banco.</p>
+      <label class="field" id="pid-field">ID do jogador (opcional, para voltar ao seu perfil)
+        <input id="pid" maxlength="12" autocomplete="off" placeholder="Ex.: 3FA9C1" style="text-transform:uppercase">
+      </label>
+      <p id="join-error" class="error" role="alert"></p>
+      <button id="btn-join" class="btn" type="button">Entrar na sala</button>
+    </section>
+    <p class="join-foot">Conta de jogo entre amigos. Os saldos valem só durante a partida.</p>
+  </main>
+
+  <main id="screen-app" class="screen" hidden>
+    <header class="hero">
+      <div class="topbar">
+        <button id="btn-code" class="room-pill" type="button" aria-label="Copiar link da sala">Sala <b id="room-code"></b></button>
+        <button type="button" class="theme-btn in-bar" aria-label="Alternar modo escuro">🌙</button>
+        <button id="btn-menu" class="icon-btn" type="button" aria-label="Menu da sala">⋯</button>
+      </div>
+    </header>
+    <section id="balance" class="card balance-card"></section>
+
+    <div id="tab-home" class="tab-pane">
+      <h2 class="sec">Ações rápidas</h2>
+      <section id="actions" class="actions"></section>
+      <button id="btn-undo" class="btn ghost undo" type="button">Desfazer última transação</button>
+      <h2 class="sec">Pendências</h2>
+      <section id="pending"></section>
+      <section id="turnbox"></section>
+      <section id="endbox"></section>
+    </div>
+
+    <div id="tab-props" class="tab-pane" hidden>
+      <div class="sec-row">
+        <h2 class="sec">Títulos de posse</h2>
+        <button id="btn-new-prop" class="mini-btn" type="button" hidden>+ Novo título</button>
+      </div>
+      <div id="props-wrap">
+        <input id="props-search" class="plain props-search" type="search" placeholder="Buscar título, dono ou tipo" aria-label="Buscar títulos">
+        <section id="props" class="props-grid"></section>
+      </div>
+    </div>
+
+    <div id="tab-game" class="tab-pane" hidden>
+      <h2 class="sec">Jogadores</h2>
+      <section id="players" class="card list"></section>
+      <h2 class="sec">Extrato</h2>
+      <section id="statement" class="card list"></section>
+    </div>
+  </main>
+
+  <nav id="tabbar" class="tabbar" aria-label="Seções do jogo">
+    <button type="button" class="tab on" data-tab="home" aria-selected="true"><i>⌂</i>Início</button>
+    <button type="button" class="tab" data-tab="props" aria-selected="false"><i>▤</i>Títulos</button>
+    <button type="button" class="tab" data-tab="game" aria-selected="false"><i>☰</i>Jogo</button>
+  </nav>
+
+  <section id="result" class="result" hidden>
+    <div class="result-card">
+      <h2>Resultado final</h2>
+      <p class="hint">Patrimônio = dinheiro + títulos. Títulos hipotecados valem a hipoteca.</p>
+      <div id="result-list"></div>
+      <button id="result-reopen" class="btn ghost" type="button" hidden>Reabrir partida</button>
+      <button id="result-close" class="btn" type="button">Fechar</button>
+    </div>
+  </section>
+
+  <div id="veil" class="veil" hidden></div>
+  <div id="overlay" class="overlay"></div>
+
+  <form id="sheet" class="sheet" autocomplete="off">
+    <div class="grab"></div>
+    <h3 id="sheet-title"></h3>
+    <div id="pick-from" class="pick"></div>
+    <div id="pick-to" class="pick"></div>
+    <label class="amount"><span>R$</span><input id="amount" inputmode="numeric" placeholder="0" aria-label="Valor"></label>
+    <div id="quick" class="chips center"></div>
+    <input id="desc" class="plain" maxlength="80" placeholder="Descrição (opcional)">
+    <p id="sheet-error" class="error" role="alert"></p>
+    <button id="sheet-ok" class="btn" type="submit">Confirmar</button>
+  </form>
+
+  <form id="prop-form" class="sheet" autocomplete="off">
+    <div class="grab"></div>
+    <h3>Novo título</h3>
+    <input id="p-name" class="plain" maxlength="30" placeholder="Nome (ex.: Av. Paulista)">
+    <span class="pick-label">Tipo</span>
+    <div id="p-types" class="chips"><button type="button" class="chip on" data-type="imovel">Imóvel</button><button type="button" class="chip" data-type="companhia">Companhia</button></div>
+    <span class="pick-label">Cor do título</span>
+    <div id="p-colors" class="swatches"></div>
+    <label class="amount"><span>R$</span><input id="p-price" inputmode="numeric" placeholder="Preço" aria-label="Preço"></label>
+    <label class="amount"><span>R$</span><input id="p-mort" inputmode="numeric" placeholder="Hipoteca" aria-label="Hipoteca"></label>
+    <label class="amount"><span>R$</span><input id="p-rent" inputmode="numeric" placeholder="Aluguel (opcional)" aria-label="Aluguel"></label>
+    <p id="p-error" class="error" role="alert"></p>
+    <button class="btn" type="submit">Criar título</button>
+  </form>
+
+  <section id="prop-sheet" class="sheet">
+    <div class="grab"></div>
+    <h3 id="ps-title"></h3>
+    <p id="ps-info" class="hint"></p>
+    <span id="ps-owner-label" class="pick-label">Dono do título</span>
+    <div id="ps-owners" class="chips"></div>
+    <label id="ps-charge-l" class="hint"><input type="checkbox" id="ps-charge"> Cobrar o preço do jogador ao atribuir</label>
+    <button id="ps-rent" class="btn" type="button" hidden></button>
+    <div id="ps-trade" hidden>
+      <span class="pick-label">Propor troca para</span>
+      <div id="ps-receivers" class="chips"></div>
+      <label class="amount"><span>R$</span><input id="ps-price" inputmode="numeric" placeholder="0" aria-label="Valor da troca"></label>
+      <p class="hint">Valor 0 = troca de graça. O jogador precisa aceitar.</p>
+      <button id="ps-trade-ok" class="btn alt" type="button">Propor troca</button>
+    </div>
+    <button id="ps-build" class="btn alt" type="button" hidden>Construir casa ou hotel</button>
+    <button id="ps-hipo" class="btn alt" type="button"></button>
+    <button id="ps-del" class="btn ghost" type="button">Remover título</button>
+  </section>
+
+  <section id="rent-sheet" class="sheet">
+    <div class="grab"></div>
+    <h3>Pagar aluguel</h3>
+    <span class="pick-label">Título</span>
+    <div id="rs-titles" class="chips"></div>
+    <div id="rs-dice-wrap" hidden>
+      <span class="pick-label">Quantos dados saíram?</span>
+      <div id="rs-dice" class="chips"></div>
+    </div>
+    <p id="rs-info" class="hint"></p>
+    <p id="rs-total" class="rs-total"></p>
+    <p id="rs-error" class="error" role="alert"></p>
+    <button id="rs-ok" class="btn" type="button">Pagar aluguel</button>
+  </section>
+
+  <section id="turn-sheet" class="sheet">
+    <div class="grab"></div>
+    <h3>Turnos</h3>
+    <label class="hint"><input type="checkbox" id="tn-on"> Ativar turnos (só quem está na vez pode mexer)</label>
+    <details id="tn-drawer" class="drawer">
+      <summary>Ordem de jogo</summary>
+      <p class="hint">Toque nos jogadores na ordem em que jogam. Toque de novo para tirar.</p>
+      <div id="tn-list" class="chips"></div>
+    </details>
+    <button id="tn-save" class="btn" type="button">Salvar turnos</button>
+  </section>
+
+  <form id="build-form" class="sheet" autocomplete="off">
+    <div class="grab"></div>
+    <h3 id="bd-title">Construir</h3>
+    <p id="bd-info" class="hint"></p>
+    <label class="amount"><span>R$</span><input id="bd-cost" inputmode="numeric" placeholder="Custo por construção" aria-label="Custo por construção"></label>
+    <label class="amount"><span>R$</span><input id="bd-rent" inputmode="numeric" placeholder="Novo aluguel" aria-label="Novo aluguel"></label>
+    <label class="opt-row"><span>Gerar QR Pix para o dono pagar</span>
+      <select id="bd-qr" class="plain" aria-label="Gerar QR Pix">
+        <option value="1" selected>Sim · QR no Banco</option>
+        <option value="0">Não · só mensagem</option>
+      </select>
+    </label>
+    <p id="bd-error" class="error" role="alert"></p>
+    <button id="bd-build" class="btn" type="button">Construir</button>
+    <button id="bd-demolish" class="btn ghost" type="button">Demolir uma</button>
+  </form>
+
+  <form id="edit-form" class="sheet" autocomplete="off">
+    <div class="grab"></div>
+    <h3>Editar título</h3>
+    <input id="ed-name" class="plain" maxlength="30" placeholder="Nome do título" aria-label="Nome">
+    <label class="amount"><span>R$</span><input id="ed-price" inputmode="numeric" placeholder="Preço" aria-label="Preço"></label>
+    <label class="amount"><span>R$</span><input id="ed-rent" inputmode="numeric" placeholder="Aluguel" aria-label="Aluguel"></label>
+    <label class="amount"><span>R$</span><input id="ed-mort" inputmode="numeric" placeholder="Hipoteca" aria-label="Hipoteca"></label>
+    <p id="ed-error" class="error" role="alert"></p>
+    <button class="btn" type="submit">Salvar alterações</button>
+  </form>
+
+  <section id="menu" class="sheet">
+    <div class="grab"></div>
+    <h3>Menu da sala</h3>
+    <div class="menu-grid">
+      <button id="m-export" class="btn alt" type="button">Salvar / Exportar JSON</button>
+      <button id="m-import" class="btn alt" type="button">Importar JSON</button>
+      
+      <button id="m-photo" class="btn alt" type="button">Trocar minha foto</button>
+    </div>
+    <form id="settings" hidden>
+      <h4>Configurações do Banco</h4>
+      <div class="row">
+        <label class="field">Saldo inicial<input id="set-start" inputmode="numeric"></label>
+        <label class="field">Salário por volta<input id="set-salary" inputmode="numeric"></label>
+      </div>
+      <p class="hint">O saldo inicial vale apenas para novos jogadores.</p>
+      <button class="btn small" type="submit">Salvar configurações</button>
+      <p class="hint">Remover jogador</p>
+      <div id="remove-list" class="chips"></div>
+    </form>
+    <button id="m-turns" class="btn alt" type="button">Turnos</button>
+    <button id="m-end" class="btn ghost" type="button">Encerrar jogo</button>
+    <p id="my-id" class="hint"></p>
+    <button id="m-leave" class="btn ghost" type="button">Sair da sala</button>
+  </section>
+
+  <section id="qr-sheet" class="sheet">
+    <div class="grab"></div>
+    <h3>Gerar Pix QR</h3>
+    <div id="qr-form" class="qr-form">
+      <label class="amount"><span>R$</span><input id="qr-amount" inputmode="numeric" placeholder="0" aria-label="Valor a cobrar"></label>
+      <div class="chips center">
+        <button type="button" class="chip" data-qv="5000">+R$ 5 mil</button>
+        <button type="button" class="chip" data-qv="25000">+R$ 25 mil</button>
+        <button type="button" class="chip" data-qv="100000">+R$ 100 mil</button>
+        <button type="button" class="chip" data-qv="250000">+R$ 250 mil</button>
+      </div>
+      <p id="qr-form-err" class="error qr-note" role="alert"></p>
+      <button id="qr-make" class="btn" type="button">Gerar QR</button>
+    </div>
+    <div id="qr-view" class="qr-card" hidden>
+      <span class="pix-tag">Pix</span>
+      <div id="qr-box" class="qr-box glow" role="img" aria-label="QR Code de cobrança"></div>
+      <b id="qr-name"></b>
+      <span id="qr-id" class="hint"></span>
+      <p class="hint qr-note">Quem vai pagar toca em “Ler QR” e aponta a câmera para esta tela. Confirma o valor e pronto.</p>
+      <button id="qr-new" class="btn alt small" type="button">Nova cobrança</button>
+    </div>
+    <p id="qr-err" class="error qr-note" role="alert"></p>
+    <button id="qr-close" class="btn ghost" type="button">Fechar</button>
+  </section>
+
+  <section id="scan-sheet" class="sheet">
+    <div class="grab"></div>
+    <h3>Ler QR</h3>
+    <div class="scan-frame">
+      <video id="scan-video" playsinline muted autoplay></video>
+      <div class="scan-line"></div>
+      <p id="scan-ph" class="scan-ph">Abrindo a câmera…</p>
+    </div>
+    <p class="hint qr-note">Aponte para o QR de quem vai receber.</p>
+    <p id="scan-err" class="error qr-note" role="alert"></p>
+    <button id="scan-manual-btn" class="btn ghost small" type="button">Digitar ID ou escolher na lista</button>
+    <div id="scan-manual" class="scan-manual" hidden>
+      <div class="scan-row">
+        <input id="scan-id" class="plain" maxlength="40" placeholder="ID do jogador" autocapitalize="characters" autocomplete="off" spellcheck="false" aria-label="ID do jogador">
+        <button id="scan-go" class="btn small" type="button">Continuar</button>
+      </div>
+      <button id="scan-list" class="btn ghost small" type="button">Escolher na lista de jogadores</button>
+    </div>
+    <button id="scan-close" class="btn ghost" type="button">Cancelar</button>
+  </section>
+
+  <div id="flash" class="flash" aria-live="polite">
+    <svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24"/><path d="M15 27l8 8 15-17"/></svg>
+    <b id="flash-title"></b><span id="flash-text"></span>
+  </div>
+  <div id="toast" class="toast" role="status"></div>
+  <input id="file" type="file" accept="application/json,.json" hidden>
+  <input id="photo-file" type="file" accept="image/*" hidden>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+(() => {
+  'use strict';
+  const $ = (s) => document.querySelector(s);
+  const digits = (v) => String(v ?? '').replace(/\D/g, '');
+  const fmtNum = (v) => digits(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const numOf = (sel) => { const d = digits($(sel).value); return d ? parseInt(d, 10) : NaN; };
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fmt = (n) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(n);
+  const av = (p) => p.photo ? `<span class="avatar"><img src="${p.photo}" alt=""></span>` : `<span class="avatar" style="background:${COLORS[p.color % COLORS.length]}">${esc(p.name[0].toUpperCase())}</span>`;
+  const COLORS = ['#1e9bd7', '#2fa56f', '#e08a1e', '#d64560', '#7b5fd0', '#139f9f'];
+  const KIND = { pix: 'Pix', salary: 'Salário', rent: 'Aluguel ou taxa', loan: 'Empréstimo', repay: 'Pagamento ao Banco', fee: 'Taxa' };
+  const SKEY = 'bi-session';
+
+  const socket = io({ reconnection: true, reconnectionDelay: 500, reconnectionDelayMax: 4000 });
+  let state = null, session = readSession(), inRoom = false, seen = null;
+  let roleSel = 'player', picked = null, sheet = null, peekTimer;
+
+  function readSession() { try { return JSON.parse(localStorage.getItem(SKEY)); } catch { return null; } }
+  function saveSession() { try { localStorage.setItem(SKEY, JSON.stringify(session)); } catch {} }
+  function clearSession() { try { localStorage.removeItem(SKEY); } catch {} }
+
+  /* ---------- Telas e feedback ---------- */
+  function showScreen(name) {
+    $('#screen-join').hidden = name !== 'join';
+    $('#screen-app').hidden = name !== 'app';
+    $('#boot').hidden = name !== 'boot';
+  }
+  let toastT;
+  function toast(msg) {
+    const t = $('#toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3000);
+  }
+  let flashT;
+  function flash(title, text) {
+    $('#flash-title').textContent = title; $('#flash-text').textContent = text;
+    const f = $('#flash'); f.classList.remove('show'); void f.offsetWidth; f.classList.add('show');
+    if (navigator.vibrate) navigator.vibrate(30);
+    clearTimeout(flashT); flashT = setTimeout(() => f.classList.remove('show'), 1400);
+  }
+  const scan = { tok: 0, stream: null, raf: 0, decode: null, forceJs: false, badVal: '', badAt: 0, errT: 0 };
+  const closeSheets = () => {
+    stopScan();
+    document.querySelectorAll('.sheet').forEach((el) => el.classList.remove('open'));
+    $('#overlay').classList.remove('open');
+  };
+  const openSheetEl = (id) => { $('#overlay').classList.add('open'); $(id).classList.add('open'); };
+  $('#overlay').addEventListener('click', closeSheets);
+
+  /* ---------- Conexão e reconexão ---------- */
+  socket.on('connect', () => { $('#conn').hidden = true; if (session) join(session, true); });
+  socket.on('disconnect', () => { $('#conn').hidden = false; });
+  socket.on('connect_error', () => { $('#conn').hidden = false; });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && !socket.connected) socket.connect(); });
+  window.addEventListener('online', () => { if (!socket.connected) socket.connect(); });
+
+  socket.on('kicked', () => {
+    session = null; clearSession(); inRoom = false; state = null; seen = null;
+    closeSheets(); showScreen('join'); toast('Você não faz mais parte desta sala.');
+  });
+
+  socket.on('room:state', (s) => {
+    state = s;
+    track();
+    if (inRoom) render();
+  });
+
+  let lastBal = null;
+  function track() {
+    const me = session && state.players.find((p) => p.id === session.playerId);
+    const bal0 = lastBal;
+    lastBal = me ? me.balance : null;
+    if (seen === null) { seen = new Set(state.transactions.map((t) => t.id)); return; }
+    for (const t of state.transactions) {
+      if (seen.has(t.id)) continue;
+      seen.add(t.id);
+      if (session && t.to === session.playerId && t.from !== session.playerId && !t.undone) {
+        if (t.via === 'qr') { celebrateQrReceive(t, bal0, lastBal); continue; }
+        toast(`Você recebeu ${fmt(t.amount)} de ${t.fromName}`);
+        if (navigator.vibrate) navigator.vibrate(60);
+      }
+    }
+  }
+
+  /* ---------- Entrada na sala ---------- */
+  function join(data, silent) {
+    if (!state || state.code !== data.code) seen = null;
+    socket.emit('room:join', { ...data, create: silent && data.role === 'bank' }, (res) => {
+      if (res && res.ok) {
+        session = { code: res.code, role: res.role, playerId: res.playerId, name: res.name };
+        saveSession(); inRoom = true; showScreen('app'); render();
+      } else {
+        if (silent) { session = null; clearSession(); inRoom = false; showScreen('join'); }
+        $('#join-error').textContent = (res && res.error) || 'Não foi possível entrar.';
+      }
+    });
+  }
+
+  function peek() {
+    const code = $('#code').value;
+    if (code.length < 4) { $('#profiles-wrap').hidden = true; return; }
+    socket.emit('room:peek', code, (res) => {
+      if (!res || !res.ok || !res.players.length) { $('#profiles-wrap').hidden = true; return; }
+      $('#profiles').innerHTML = res.players.map((p) =>
+        `<button type="button" class="chip ${picked === p.id ? 'on' : ''}" data-id="${p.id}" data-name="${esc(p.name)}"><span class="dot ${p.online ? 'on' : ''}"></span>${esc(p.name)}</button>`).join('');
+      $('#profiles-wrap').hidden = roleSel !== 'player';
+    });
+  }
+
+  function updateRole() {
+    document.querySelectorAll('#role-seg button').forEach((b) => b.classList.toggle('on', b.dataset.role === roleSel));
+    $('#name-hint').hidden = roleSel !== 'bank';
+    $('#profiles-wrap').hidden = !$('#profiles').children.length;
+  }
+  $('#role-seg').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-role]'); if (!b) return;
+    roleSel = b.dataset.role; updateRole();
+  });
+  $('#code').addEventListener('input', (e) => {
+    e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    clearTimeout(peekTimer); peekTimer = setTimeout(peek, 300);
+  });
+  $('#name').addEventListener('input', () => { picked = null; document.querySelectorAll('#profiles .chip').forEach((c) => c.classList.remove('on')); });
+  $('#profiles').addEventListener('click', (e) => {
+    const c = e.target.closest('.chip'); if (!c) return;
+    picked = c.dataset.id; $('#name').value = c.dataset.name;
+    document.querySelectorAll('#profiles .chip').forEach((x) => x.classList.toggle('on', x === c));
+  });
+  $('#btn-create').addEventListener('click', () => {
+    socket.emit('room:create', { code: $('#code').value }, (res) => {
+      if (!res || !res.ok) return;
+      $('#code').value = res.code; $('#join-error').textContent = '';
+      roleSel = 'bank'; updateRole();
+      toast(`Sala ${res.code} criada. Compartilhe o código com a mesa.`);
+      join({ code: res.code, role: 'bank', name: $('#name').value.trim(), playerId: picked, create: true }, false);
+    });
+  });
+  $('#btn-join').addEventListener('click', () => {
+    const err = $('#join-error'); err.textContent = '';
+    const code = $('#code').value, name = $('#name').value.trim();
+    if (code.length < 4) { err.textContent = 'Digite o código da sala.'; return; }
+    const pidVal = $('#pid').value.trim().toUpperCase();
+    if (roleSel === 'player' && !name && !pidVal) { err.textContent = 'Digite seu nome, seu ID ou toque em um perfil.'; return; }
+    join({ code, role: roleSel, name, playerId: picked, playerCode: roleSel === 'player' ? pidVal : '' }, false);
+  });
+
+  /* ---------- Dados derivados ---------- */
+  const role = () => session.role;
+  const myPlayer = () => state.players.find((p) => p.id === session.playerId);
+  const parties = () => [{ id: 'bank', name: 'Banco' }, ...state.players];
+  const nameOf = (id) => id === 'bank' ? 'Banco' : id === session.playerId ? 'Você' : (state.players.find((p) => p.id === id)?.name || '?');
+  const timeOf = (ts) => new Date(ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const lastTx = () => [...state.transactions].reverse().find((t) => !t.undone);
+  const canUndo = () => { const t = lastTx(); return !!t && (role() === 'bank' || t.from === session.playerId || t.to === session.playerId); };
+
+  function currentActions() {
+    const me = session.playerId, salary = state.settings.salary;
+    const transfer = { group: 'Operações', label: 'Transferir', title: 'Transferir', glyph: '⇄', from: null, to: null, kind: 'pix', desc: '' };
+    const paySalary = { group: 'Operações', label: 'Pagar salário', title: 'Pagar salário', glyph: '★', from: 'bank', to: null, kind: 'salary', desc: 'Passagem pelo início', amount: salary, fixed: true, noBank: ['to'], main: true };
+    const charge = { group: 'Operações', label: 'Cobrar', title: 'Cobrar de um jogador', glyph: '↙', from: null, to: me, kind: 'rent', desc: 'Aluguel', mode: 'charge', noBank: ['from'] };
+    const rentAct = { group: 'Operações', label: 'Pagar aluguel', glyph: '⌂', special: 'rent', main: true };
+    const scanAct = { group: 'Operações', label: 'Ler QR', glyph: '▦', special: 'scan' };
+    if (role() === 'bank') {
+      if (!me) return [paySalary, transfer];
+      return [transfer, paySalary, charge, rentAct];
+    }
+    return [
+      { group: 'Operações', label: 'Transferir', title: 'Transferir', glyph: '⇄', from: me, to: null, kind: 'pix', desc: '' },
+      rentAct,
+      charge,
+    ];
+  }
+
+  /* ---------- Renderização ---------- */
+  function render() {
+    if (!state || !session) return;
+    if (role() === 'player' && !myPlayer()) return;
+    $('#room-code').textContent = state.code;
+    renderBalance(); renderActions(); renderTurns(); renderPending(); renderEnd(); renderPlayers(); renderProps(); renderStatement(); renderResult();
+    $('#m-end').hidden = role() !== 'bank';
+    $('#m-turns').hidden = role() !== 'bank';
+    const tt = state.turns, curId = tt && tt.enabled && tt.order.length ? tt.order.filter((id) => state.players.some((p) => p.id === id))[tt.current % tt.order.length] : null;
+    const locked = role() === 'player' && !!curId && curId !== session.playerId;
+    $('#actions').classList.toggle('locked', locked);
+    $('#veil').hidden = !locked;
+    if (locked && $('#scan-sheet').classList.contains('open')) closeSheets();
+    $('#btn-undo').disabled = !canUndo() || locked;
+    $('#btn-new-prop').hidden = role() !== 'bank';
+    $('#my-id').textContent = session.playerId ? 'Seu ID de jogador: ' + session.playerId : '';
+    $('#btn-undo').disabled = !canUndo();
+    $('#settings').hidden = role() !== 'bank';
+    $('#m-import').hidden = role() !== 'bank';
+    $('#m-photo').hidden = !session.playerId;
+  }
+
+  function renderBalance() {
+    const me = myPlayer();
+    const photo = me ? `<button type="button" id="photo-btn" class="photo-btn" aria-label="Trocar minha foto">${av(me)}</button>` : '';
+    if (role() === 'bank') {
+      const total = state.players.reduce((s, p) => s + p.balance, 0);
+      if (me) {
+        $('#balance').innerHTML = `${photo}<p class="who">Mestre · Sua conta</p><p class="amount-big ${me.balance < 0 ? 'neg' : ''}">${fmt(me.balance)}</p><p class="sub">Saldo do Banco: <b>${fmt(total)}</b> em circulação com ${state.players.length} jogador(es)</p>`;
+      } else {
+        $('#balance').innerHTML = `<p class="who">Banco · Mestre</p><p class="amount-big">${fmt(total)}</p><p class="sub">em circulação com ${state.players.length} jogador(es)</p>`;
+      }
+    } else {
+      $('#balance').innerHTML = `${photo}<p class="who">Olá, ${esc(me.name)}</p><p class="amount-big ${me.balance < 0 ? 'neg' : ''}">${fmt(me.balance)}</p><p class="sub">Seu saldo</p>`;
+    }
+  }
+
+  function renderActions() {
+    const groups = new Map();
+    currentActions().forEach((x, i) => {
+      if (!groups.has(x.group)) groups.set(x.group, []);
+      groups.get(x.group).push(`<button type="button" class="act ${x.main ? 'main' : ''}" data-i="${i}"><i>${x.glyph}</i>${esc(x.label)}</button>`);
+    });
+    const canScan = !!myPlayer();
+    const hero = `<div class="qr-hero${canScan ? '' : ' single'}"><button type="button" data-qr="make"><i>▦</i>Gerar Pix QR<small>${canScan ? 'Cobrar com valor' : 'Cobrar do jogador'}</small></button>${canScan ? '<button type="button" class="scan" data-qr="scan"><i>⌖</i>Ler QR<small>Pagar escaneando</small></button>' : ''}</div>`;
+    $('#actions').innerHTML = hero + [...groups].map(([t, btns]) =>
+      `<div class="group"><p class="group-title">${esc(t)}</p><div class="grid3">${btns.join('')}</div></div>`).join('');
+    $('#actions').querySelectorAll('.act').forEach((b, i) => {
+      const x = currentActions()[+b.dataset.i];
+      if (x && x.sec) b.classList.add('sec');
+    });
+  }
+
+  function renderEnd() {
+    const ev = state.endVote, bank = role() === 'bank';
+    if (!ev) { $('#endbox').innerHTML = ''; return; }
+    const voted = !!session.playerId && ev.votes.includes(session.playerId);
+    let actions = '';
+    if (voted) actions = '<p class="hint">Você já concordou. Aguardando os outros jogadores.</p>';
+    else if (session.playerId) actions = '<div class="btns"><button class="btn small" data-end="1" type="button">Concordar</button><button class="btn small ghost" data-end="0" type="button">Recusar</button></div>';
+    else actions = '<p class="hint">O Banco não vota. Só os jogadores.</p>';
+    if (bank) actions += '<div class="btns"><button id="end-cancel" class="btn small ghost" type="button">Cancelar proposta</button></div>';
+    $('#endbox').innerHTML = `<div class="card charge"><p><b>Proposta para encerrar o jogo.</b> Concordaram ${ev.votes.length} de ${ev.total} jogadores. Todos precisam concordar.</p>${actions}</div>`;
+  }
+  $('#endbox').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-end]');
+    if (b) socket.emit('game:vote-end', { accept: b.dataset.end === '1' }, (res) => { if (!res.ok) toast(res.error); });
+    if (e.target.closest('#end-cancel')) socket.emit('game:cancel-end', (res) => { if (!res.ok) toast(res.error); });
+  });
+  let resultClosed = null;
+  function renderResult() {
+    const r = state.result;
+    $('#result').hidden = !r || resultClosed === r.endedAt;
+    if (!r) return;
+    $('#result-list').innerHTML = r.ranking.map((p) => `<div class="rank">
+      <div class="rank-head"><span>${p.rank}º ${esc(p.name)}</span><span>${fmt(p.total)}</span></div>
+      <small>Dinheiro ${fmt(p.cash)} · Títulos ${fmt(p.propValue)}</small>
+      <ul>${p.props.length ? p.props.map((x) => `<li>${esc(x.name)} · ${fmt(x.value)}${x.mortgaged ? ' (hipotecado)' : ''}</li>`).join('') : '<li>Sem títulos</li>'}</ul>
+    </div>`).join('');
+    $('#result-reopen').hidden = role() !== 'bank';
+  }
+  $('#result-close').addEventListener('click', () => { if (state.result) resultClosed = state.result.endedAt; renderResult(); });
+  $('#result-reopen').addEventListener('click', () => socket.emit('game:reopen', (res) => { if (!res.ok) toast(res.error); }));
+  $('#m-end').addEventListener('click', () => {
+    if (!confirm('Propor o encerramento da partida? Todos os jogadores precisam concordar.')) return;
+    socket.emit('game:propose-end', (res) => {
+      toast(res.ok ? 'Proposta enviada aos jogadores.' : res.error);
+      if (res.ok) closeSheets();
+    });
+  });
+
+  function renderPending() {
+    const me = session.playerId;
+    const bank = role() === 'bank';
+    if (!me && !bank) { $('#pending').innerHTML = ''; return; }
+    $('#pending').innerHTML = state.pending.filter((r) => bank ? r.type === 'build' : ((r.from === me || r.to === me) && !(r.type === 'build' && r.qr && r.from === me))).map((r) => {
+      if (r.type === 'build') return r.from === me
+        ? `<div class="card charge"><p>O Banco propõe construir em <b>${esc(r.description)}</b>${r.amount ? ` por <b>${fmt(r.amount)}</b>` : ' sem custo'}. Novo aluguel: <b>${fmt(r.rent)}</b>.</p>
+           <div class="btns"><button class="btn small" data-resp="1" data-id="${r.id}">Aceitar</button><button class="btn small ghost" data-resp="0" data-id="${r.id}">Recusar</button></div></div>`
+        : `<div class="card charge"><p>Proposta de construção em <b>${esc(r.description)}</b> enviada a <b>${esc(r.fromName)}</b>. Aguardando.</p>
+           ${bank && r.qr ? `<div class="pending-qr"><span class="pix-tag">Pix · Banco Imobiliário</span><div class="qr-box glow" data-build-qr="${r.id}"></div><small class="hint">${esc(r.fromName)} lê este QR em Ler QR para construir e pagar.</small></div>` : ''}
+           <div class="btns"><button class="btn small ghost" data-resp="0" data-id="${r.id}">Cancelar proposta</button></div></div>`;
+      if (r.type === 'trade') return r.from === me
+        ? `<div class="card charge"><p><b>${esc(r.toName)}</b> propõe que você receba <b>${esc(r.description)}</b>${r.amount ? ` por <b>${fmt(r.amount)}</b>` : ' sem custo'}.</p>
+           <div class="btns"><button class="btn small" data-resp="1" data-id="${r.id}">Aceitar</button><button class="btn small ghost" data-resp="0" data-id="${r.id}">Recusar</button></div></div>`
+        : `<div class="card charge"><p>Proposta de troca de <b>${esc(r.description)}</b> enviada a <b>${esc(r.fromName)}</b>. Aguardando.</p>
+           <div class="btns"><button class="btn small ghost" data-resp="0" data-id="${r.id}">Cancelar</button></div></div>`;
+      return r.from === me
+        ? `<div class="card charge"><p><b>${esc(r.toName)}</b> está cobrando <b>${fmt(r.amount)}</b>${r.description ? ` (${esc(r.description)})` : ''}</p>
+           <div class="btns"><button class="btn small" data-resp="1" data-id="${r.id}">Pagar</button><button class="btn small ghost" data-resp="0" data-id="${r.id}">Recusar</button></div></div>`
+        : `<div class="card charge"><p>Cobrança de <b>${fmt(r.amount)}</b> enviada a <b>${esc(r.fromName)}</b>. Aguardando pagamento.</p>
+           <div class="btns"><button class="btn small ghost" data-resp="0" data-id="${r.id}">Cancelar cobrança</button></div></div>`;
+    }).join('');
+    drawBuildQrs();
+  }
+
+  function drawBuildQrs() {
+    if (!document.querySelector('[data-build-qr]')) return;
+    loadLib(CDN_QR).then(() => {
+      document.querySelectorAll('[data-build-qr]').forEach((el) => {
+        if (el.dataset.drawn === '1') return;
+        el.dataset.drawn = '1';
+        new window.QRCode(el, { text: QR_BUILD + el.dataset.buildQr, width: 180, height: 180, colorDark: '#000000', colorLight: '#ffffff', correctLevel: window.QRCode.CorrectLevel.M });
+      });
+    }).catch(() => {});
+  }
+
+  function renderPlayers() {
+    if (!state.players.length) { $('#players').innerHTML = '<p class="empty">Nenhum jogador ainda. Compartilhe o código da sala.</p>'; return; }
+    $('#players').innerHTML = state.players.map((p) =>
+      `<button type="button" class="row-item" data-id="${p.id}">
+        ${av(p)}
+        <span class="grow"><b>${esc(p.name)}${p.id === session.playerId ? ' (você)' : ''}</b><small><span class="dot ${p.online ? 'on' : ''}"></span>${p.online ? 'Online' : 'Offline'} · ID ${p.id}</small></span>
+        <span class="val ${p.balance < 0 ? 'neg' : ''}">${fmt(p.balance)}</span></button>`).join('')
+      + `<div class="row-item"><span class="avatar" style="background:#0a6fb0">B</span><span class="grow"><b>Banco</b><small><span class="dot ${state.bankOnline ? 'on' : ''}"></span>${state.bankOnline ? 'Online' : 'Sem gerente conectado'}</small></span></div>`;
+  }
+
+  function renderStatement() {
+    const list = [...state.transactions].reverse().slice(0, 60);
+    if (!list.length) { $('#statement').innerHTML = '<p class="empty">Sem transações. Faça o primeiro Pix.</p>'; return; }
+    const me = session.playerId;
+    $('#statement').innerHTML = list.map((t) => {
+      let title, sign = '', cls = '';
+      if (t.from === me) { title = `Para ${t.toName}`; sign = '−'; cls = 'neg'; }
+      else if (t.to === me) { title = `De ${t.fromName}`; sign = '+'; cls = 'pos'; }
+      else title = `${t.fromName} para ${t.toName}`;
+      return `<div class="row-item ${t.undone ? 'undone' : ''}">
+        <span class="grow"><b>${esc(title)}</b><small>${esc(t.description || KIND[t.kind] || 'Pix')}</small></span>
+        <span class="val ${cls}">${sign}${fmt(t.amount)}<small>${timeOf(t.ts)}${t.undone ? ' <span class="tag">DESFEITA</span>' : ''}</small></span></div>`;
+    }).join('');
+  }
+
+  /* ---------- Folha de transação ---------- */
+  function openSheet(act, preset = {}) {
+    sheet = { act, from: act.from ?? preset.from ?? null, to: act.to ?? preset.to ?? null, qr: !!preset.qr, buildId: preset.buildId || null };
+    $('#sheet-title').textContent = act.title || act.label;
+    const qrAmt = preset.amount || 0;
+    $('#amount').value = fmtNum(qrAmt || act.amount);
+    $('#amount').readOnly = !!act.fixed || !!qrAmt;
+    $('#quick').hidden = !!act.fixed || !!qrAmt;
+    $('#desc').value = act.desc || '';
+    $('#sheet-error').textContent = '';
+    $('#quick').innerHTML = [5000, 25000, 100000, 250000].map((v) => `<button type="button" class="chip" data-v="${v}">+R$ ${v / 1000} mil</button>`).join('');
+    renderPick('from'); renderPick('to');
+    openSheetEl('#sheet');
+  }
+
+  function renderPick(side) {
+    const act = sheet.act, locked = act[side] != null;
+    const other = side === 'from' ? sheet.to : sheet.from;
+    const opts = locked ? [act[side]] : parties().map((p) => p.id)
+      .filter((id) => id !== other && !(id === 'bank' && (act.noBank || []).includes(side)));
+    $('#pick-' + side).innerHTML = `<span class="pick-label">${side === 'from' ? 'De' : 'Para'}</span><div class="chips">${opts.map((id) =>
+      `<button type="button" class="chip ${sheet[side] === id ? 'on' : ''}" data-side="${side}" data-id="${id}" ${locked ? 'disabled' : ''}>${esc(nameOf(id))}</button>`).join('')}</div>`;
+  }
+
+  $('#sheet').addEventListener('click', (e) => {
+    const c = e.target.closest('.chip'); if (!c || !sheet) return;
+    if (c.dataset.v) { $('#amount').value = fmtNum((numOf('#amount') || 0) + parseInt(c.dataset.v, 10)); return; }
+    const side = c.dataset.side, other = side === 'from' ? 'to' : 'from';
+    sheet[side] = c.dataset.id;
+    if (sheet[other] === sheet[side] && sheet.act[other] == null) sheet[other] = null;
+    renderPick('from'); renderPick('to');
+  });
+  $('#amount').addEventListener('input', (e) => { e.target.value = fmtNum(digits(e.target.value).slice(0, 9)); });
+
+  $('#sheet').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const err = $('#sheet-error'); err.textContent = '';
+    const amount = numOf('#amount');
+    if (!sheet.from || !sheet.to) { err.textContent = 'Escolha quem envia e quem recebe.'; return; }
+    if (!amount || amount < 1) { err.textContent = 'Informe um valor.'; return; }
+    if (!socket.connected) { err.textContent = 'Sem conexão. Aguarde a reconexão.'; return; }
+    const payload = { from: sheet.from, to: sheet.to, amount, kind: sheet.act.kind, description: $('#desc').value };
+    const isCharge = sheet.act.mode === 'charge', btn = $('#sheet-ok');
+    const qrPay = !!sheet.qr && !isCharge;
+    if (qrPay) payload.via = 'qr';
+    if (sheet.buildId) payload.buildId = sheet.buildId;
+    const srcRect = $('#amount').getBoundingClientRect();
+    const oldBal = myPlayer() ? myPlayer().balance : null;
+    const buildName = sheet.buildId ? ((state.pending.find((x) => x.id === sheet.buildId) || {}).description || 'Casa') : '';
+    btn.disabled = true;
+    socket.emit(isCharge ? 'charge:request' : 'tx:transfer', payload, (res) => {
+      btn.disabled = false;
+      if (!res || !res.ok) { err.textContent = (res && res.error) || 'Falha na operação.'; return; }
+      const to = nameOf(payload.to);
+      if (sheet.buildId) {
+        closeSheets(); playCoinSound();
+        flash('Construído!', buildName + ' · ' + fmt(amount) + ' pago ao Banco');
+        if (navigator.vibrate) navigator.vibrate([30, 40, 80]);
+        return;
+      }
+      if (qrPay) { celebrateQrPay(amount, oldBal, srcRect, to); return; }
+      closeSheets();
+      flash(isCharge ? 'Cobrança enviada' : 'Feito!', isCharge ? `${fmt(amount)} de ${nameOf(payload.from)}` : `${fmt(amount)} para ${to}`);
+    });
+  });
+
+  /* ---------- Celebração de pagamento por QR ---------- */
+  const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function playCoinSound() {
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      const ctx = new Ctx(), t = ctx.currentTime;
+      [0, 0.09, 0.18].forEach((d, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'triangle';
+        o.frequency.setValueAtTime(980 + i * 260, t + d);
+        o.frequency.exponentialRampToValueAtTime(1900 + i * 180, t + d + 0.08);
+        g.gain.setValueAtTime(0.0001, t + d);
+        g.gain.exponentialRampToValueAtTime(0.22, t + d + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.2);
+        o.connect(g).connect(ctx.destination);
+        o.start(t + d); o.stop(t + d + 0.22);
+      });
+      setTimeout(() => ctx.close().catch(() => {}), 900);
+    } catch {}
+  }
+  function flyCoin(from, to) {
+    const c = document.createElement('div');
+    c.className = 'coin'; c.textContent = 'R$';
+    document.body.appendChild(c);
+    const sx = from.left + from.width / 2 - 20, sy = from.top + from.height / 2 - 20;
+    const ex = to.left + to.width / 2 - 20, ey = to.top + to.height / 2 - 20;
+    const mx = (sx + ex) / 2, my = Math.min(sy, ey) - 140;
+    const a = c.animate([
+      { transform: `translate(${sx}px,${sy}px) scale(.5)`, opacity: 0 },
+      { transform: `translate(${sx}px,${sy}px) scale(1)`, opacity: 1, offset: 0.12 },
+      { transform: `translate(${mx}px,${my}px) scale(1.2) rotate(200deg)`, offset: 0.55 },
+      { transform: `translate(${ex}px,${ey}px) scale(.9) rotate(400deg)`, opacity: 1, offset: 0.9 },
+      { transform: `translate(${ex}px,${ey}px) scale(.3)`, opacity: 0 },
+    ], { duration: 950, easing: 'cubic-bezier(.3,.7,.4,1)', fill: 'forwards' });
+    a.onfinish = () => c.remove();
+  }
+  function countBalance(el, from, to) {
+    const t0 = performance.now(), D = 900;
+    const step = (t) => {
+      const k = Math.min(1, (t - t0) / D), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = fmt(Math.round(from + (to - from) * e));
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+  /* Recebedor: animação só em cima da tela; o QR continua aberto. */
+  function celebrateQrReceive(t, oldBal, newBal) {
+    const still = !reducedMotion();
+    playCoinSound();
+    if (still) {
+      const dst = $('#balance').getBoundingClientRect();
+      const src = { left: innerWidth / 2 - 20, top: 60, width: 40, height: 40 };
+      [0, 130, 260].forEach((d) => setTimeout(() => flyCoin(src, dst), d));
+      if (oldBal != null && newBal != null && newBal !== oldBal) setTimeout(() => {
+        const el = $('#balance .amount-big');
+        if (el) countBalance(el, oldBal, newBal);
+      }, 650);
+    }
+    setTimeout(() => flash('Você recebeu', fmt(t.amount) + ' de ' + t.fromName), still ? 650 : 0);
+    if (navigator.vibrate) navigator.vibrate([60, 60, 60]);
+  }
+  function celebrateQrPay(amount, oldBal, srcRect, toName) {
+    closeSheets();
+    playCoinSound();
+    const still = !reducedMotion();
+    if (still) {
+      const dst = $('#balance').getBoundingClientRect();
+      [0, 130, 260].forEach((d) => setTimeout(() => flyCoin(srcRect, dst), d));
+      if (oldBal != null) setTimeout(() => {
+        const el = $('#balance .amount-big'), me = myPlayer();
+        if (el && me) countBalance(el, oldBal, me.balance);
+      }, 650);
+    }
+    setTimeout(() => flash('Pago!', fmt(amount) + ' para ' + toName), still ? 650 : 0);
+    if (navigator.vibrate) navigator.vibrate([30, 40, 80]);
+  }
+
+  /* ---------- Ações na tela principal ---------- */
+  $('#actions').addEventListener('click', (e) => {
+    const q = e.target.closest('button[data-qr]');
+    if (q) { if (q.dataset.qr === 'make') openMyQr(); else openScan(); return; }
+    const b = e.target.closest('button[data-i]'); if (!b) return;
+    const x = currentActions()[+b.dataset.i];
+    if (x.special === 'rent') openRent(null); else if (x.special === 'scan') openScan(); else openSheet(x);
+  });
+  $('#players').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-id]'); if (!b) return;
+    if (role() === 'bank') openSheet(currentActions().find((x) => x.label === 'Transferir'), { from: 'bank', to: b.dataset.id });
+    else if (b.dataset.id !== session.playerId) openSheet(currentActions()[0], { to: b.dataset.id });
+  });
+  $('#pending').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-resp]'); if (!b) return;
+    socket.emit('charge:respond', { id: b.dataset.id, accept: b.dataset.resp === '1' }, (res) => {
+      if (!res.ok) toast(res.error); else if (b.dataset.resp === '1') flash('Pago!', 'Cobrança quitada');
+    });
+  });
+  $('#btn-undo').addEventListener('click', () => {
+    const t = lastTx(); if (!t) return;
+    if (!confirm(`Desfazer ${fmt(t.amount)} de ${t.fromName} para ${t.toName}?`)) return;
+    socket.emit('tx:undo', (res) => toast(res.ok ? 'Transação desfeita.' : res.error));
+  });
+  $('#btn-code').addEventListener('click', async () => {
+    const link = `${location.origin}/?sala=${state.code}`;
+    try { await navigator.clipboard.writeText(link); toast('Link da sala copiado.'); } catch { toast(`Código da sala: ${state.code}`); }
+  });
+
+  /* ---------- Menu, JSON e configurações ---------- */
+  $('#btn-menu').addEventListener('click', () => {
+    $('#set-start').value = fmtNum(state.settings.startBalance);
+    $('#set-salary').value = fmtNum(state.settings.salary);
+    $('#remove-list').innerHTML = state.players.map((p) => `<button type="button" class="chip" data-rm="${p.id}">${esc(p.name)} ✕</button>`).join('');
+    openSheetEl('#menu');
+  });
+  $('#remove-list').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-rm]'); if (!b) return;
+    if (!confirm('Remover este jogador da partida?')) return;
+    socket.emit('player:remove', { id: b.dataset.rm }, (res) => { toast(res.ok ? 'Jogador removido.' : res.error); if (res.ok) closeSheets(); });
+  });
+  $('#settings').addEventListener('submit', (e) => {
+    e.preventDefault();
+    socket.emit('settings:update', { startBalance: numOf('#set-start'), salary: numOf('#set-salary') }, (res) => {
+      toast(res.ok ? 'Configurações salvas.' : res.error); if (res.ok) closeSheets();
+    });
+  });
+  $('#m-export').addEventListener('click', () => {
+    const data = {
+      app: 'banco-imobiliario', version: 1, exportedAt: new Date().toISOString(), roomCode: state.code,
+      settings: state.settings,
+      players: state.players.map(({ id, name, balance, color, photo }) => ({ id, name, balance, color, photo })),
+      transactions: state.transactions,
+      properties: state.properties,
+    };
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+    a.download = `banco-imobiliario-${state.code}-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    toast('Partida salva em JSON.');
+  });
+  $('#m-import').addEventListener('click', () => $('#file').click());
+  $('#file').addEventListener('change', async (e) => {
+    const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+    try {
+      const data = JSON.parse(await f.text());
+      if (!confirm('Substituir jogadores, saldos e histórico desta sala pelos dados do arquivo?')) return;
+      socket.emit('state:import', data, (res) => { toast(res.ok ? 'Partida restaurada para todos.' : res.error); if (res.ok) closeSheets(); });
+    } catch { toast('Arquivo JSON inválido.'); }
+  });
+  $('#m-leave').addEventListener('click', () => {
+    socket.emit('room:leave', () => {
+      session = null; clearSession(); inRoom = false; state = null; seen = null;
+      closeSheets(); showScreen('join');
+    });
+  });
+
+  $('#balance').addEventListener('click', (e) => { if (e.target.closest('#photo-btn')) $('#photo-file').click(); });
+  $('#m-photo').addEventListener('click', () => $('#photo-file').click());
+  $('#photo-file').addEventListener('change', (e) => {
+    const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+    const img = new Image();
+    img.onload = () => {
+      const S = 160, c = document.createElement('canvas'); c.width = c.height = S;
+      const k = Math.max(S / img.width, S / img.height), w = img.width * k, hh = img.height * k;
+      c.getContext('2d').drawImage(img, (S - w) / 2, (S - hh) / 2, w, hh);
+      URL.revokeObjectURL(img.src);
+      socket.emit('player:photo', { photo: c.toDataURL('image/jpeg', 0.75) }, (res) => {
+        toast(res.ok ? 'Foto atualizada.' : res.error); if (res.ok) closeSheets();
+      });
+    };
+    img.onerror = () => toast('Não foi possível abrir essa imagem.');
+    img.src = URL.createObjectURL(f);
+  });
+
+  /* ---------- QR Code: Meu QR e Ler QR ---------- */
+  const QR_PREFIX = 'bi:player:';
+  const QR_CHARGE = 'bi:cobra:';
+  const APP_VERSION = '2026.11.27-qr5';
+  const QR_BANK = 'bi:bank:';
+  const QR_BUILD = 'bi:build:';
+  fetch('/healthz', { cache: 'no-store' }).then((r) => r.text()).then((t) => {
+    if (t.indexOf(APP_VERSION) < 0) setTimeout(() => toast('Servidor desatualizado: suba o server.js no Render e reinicie.'), 1500);
+  }).catch(() => {});
+  const MAX_QR_AMOUNT = 1000000000;
+  // Cada biblioteca tem um endereço principal (cdnjs) e um de reserva (jsDelivr).
+  const CDN_QR = ['https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js', 'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js'];
+  const CDN_JSQR = ['https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js', 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js'];
+  const libs = {};
+  function loadOne(url) {
+    return new Promise((ok, fail) => {
+      const el = document.createElement('script');
+      el.src = url; el.async = true;
+      el.onload = () => ok();
+      el.onerror = () => { el.remove(); fail(new Error('lib')); };
+      document.head.appendChild(el);
+    });
+  }
+  function loadLib(urls) {
+    const list = Array.isArray(urls) ? urls : [urls];
+    const key = list.join('|');
+    if (!libs[key]) libs[key] = list.reduce((p, url) => p.catch(() => loadOne(url)), Promise.reject()).catch((e) => { delete libs[key]; throw e; });
+    return libs[key];
+  }
+
+  function showQrForm() {
+    $('#qr-form').hidden = false;
+    $('#qr-view').hidden = true;
+    $('#qr-box').innerHTML = '';
+    $('#qr-err').textContent = '';
+    $('#qr-form-err').textContent = '';
+    $('#qr-amount').value = '';
+  }
+  function openMyQr() {
+    const me = myPlayer(); if (!me && role() !== 'bank') return;
+    closeSheets();
+    showQrForm();
+    openSheetEl('#qr-sheet');
+    setTimeout(() => $('#qr-amount').focus(), 250);
+  }
+  $('#qr-amount').addEventListener('input', (e) => { e.target.value = fmtNum(digits(e.target.value).slice(0, 10)); });
+  $('#qr-form').addEventListener('click', (e) => {
+    const c = e.target.closest('[data-qv]'); if (!c) return;
+    $('#qr-amount').value = fmtNum((numOf('#qr-amount') || 0) + parseInt(c.dataset.qv, 10));
+  });
+  function makeCharge() {
+    const me = myPlayer(); if (!me && role() !== 'bank') return;
+    const amount = numOf('#qr-amount');
+    const err = $('#qr-form-err');
+    err.textContent = '';
+    if (!amount || amount < 1) { err.textContent = 'Informe um valor.'; return; }
+    if (amount > MAX_QR_AMOUNT) { err.textContent = 'Valor muito alto.'; return; }
+    const text = me ? QR_CHARGE + me.id + ':' + amount : QR_BANK + amount;
+    const who = me ? me.name : 'Banco Imobiliário';
+    const box = $('#qr-box');
+    box.innerHTML = '';
+    $('#qr-name').textContent = who + ' · ' + fmt(amount);
+    $('#qr-id').textContent = 'Cobrança de ' + fmt(amount) + ' para ' + who;
+    $('#qr-form').hidden = true;
+    $('#qr-view').hidden = false;
+    $('#qr-err').textContent = '';
+    loadLib(CDN_QR).then(() => {
+      if (!$('#qr-view').isConnected || $('#qr-view').hidden) return;
+      box.innerHTML = '';
+      new window.QRCode(box, { text, width: 256, height: 256, colorDark: '#000000', colorLight: '#ffffff', correctLevel: window.QRCode.CorrectLevel.M });
+    }).catch(() => { $('#qr-err').textContent = 'Não foi possível gerar o QR agora. Tente de novo.'; });
+  }
+  $('#qr-make').addEventListener('click', makeCharge);
+  $('#qr-new').addEventListener('click', showQrForm);
+  $('#qr-close').addEventListener('click', closeSheets);
+
+  /* Lê o texto do QR (ou do ID digitado) e devolve o jogador ou uma mensagem de erro curta. */
+  function parseQr(raw) {
+    const t = String(raw || '').trim();
+    const low = t.toLowerCase();
+    if (low.indexOf(QR_BUILD) === 0) {
+      const id = t.slice(QR_BUILD.length).trim();
+      const r = state.pending.find((x) => x.id === id && x.type === 'build');
+      if (!r) return { error: 'Proposta de construção não encontrada.' };
+      if (r.from !== session.playerId) return { error: 'Essa construção é de outro jogador.' };
+      return { build: r };
+    }
+    if (low.indexOf(QR_BANK) === 0) {
+      const rest = t.slice(QR_BANK.length);
+      if (!/^\d{1,10}$/.test(rest)) return { error: 'Cobrança do Banco inválida.' };
+      const amount = parseInt(rest, 10);
+      if (!amount || amount > MAX_QR_AMOUNT) return { error: 'Valor de cobrança inválido.' };
+      if (!myPlayer()) return { error: 'Crie uma conta de jogador para pagar o Banco.' };
+      return { player: { id: 'bank', name: 'Banco' }, amount };
+    }
+    let id = '', amount = 0;
+    if (low.indexOf(QR_CHARGE) === 0) {
+      const m = t.slice(QR_CHARGE.length).match(/^([^:]+):(\d{1,10})$/);
+      if (!m) return { error: 'Cobrança inválida.' };
+      id = m[1]; amount = parseInt(m[2], 10);
+      if (!amount || amount > MAX_QR_AMOUNT) return { error: 'Valor de cobrança inválido.' };
+    } else if (low.indexOf(QR_PREFIX) === 0) {
+      id = t.slice(QR_PREFIX.length).trim();
+    } else {
+      return { error: 'Esse QR não é do B.I. Bank.' };
+    }
+    const p = id ? state.players.find((x) => x.id.toLowerCase() === id.trim().toLowerCase()) : null;
+    if (!p) return { error: 'Jogador não encontrado nesta sala.' };
+    if (p.id === session.playerId) return { error: 'Esse é o seu próprio QR.' };
+    return { player: p, amount };
+  }
+
+  /* Dono lê o QR da construção: abre o Pix com o valor travado. Ao confirmar, a casa é construída. */
+  function payBuild(r) {
+    if (!r.amount) { confirmBuild(r); return; }
+    closeSheets();
+    const act = currentActions().find((x) => x.label === 'Transferir');
+    openSheet(act, { from: r.from, to: 'bank', amount: r.amount, qr: true, buildId: r.id });
+    $('#sheet-title').textContent = 'Pagar construção · ' + r.description;
+    if (navigator.vibrate) navigator.vibrate(40);
+  }
+
+  /* Dono da construção sem custo: confirma direto. */
+  function confirmBuild(r) {
+    closeSheets();
+    const price = r.amount ? fmt(r.amount) : 'sem custo';
+    if (!confirm('Construir em ' + r.description + ' por ' + price + '?\nNovo aluguel: ' + fmt(r.rent) + '.')) return;
+    socket.emit('charge:respond', { id: r.id, accept: true }, (res) => {
+      if (!res || !res.ok) { toast((res && res.error) || 'Não foi possível construir.'); return; }
+      flash('Construído!', r.description);
+    });
+    if (navigator.vibrate) navigator.vibrate(40);
+  }
+
+  function scanError(msg) {
+    const el = $('#scan-err');
+    el.textContent = msg;
+    clearTimeout(scan.errT);
+    scan.errT = setTimeout(() => { el.textContent = ''; }, 2800);
+  }
+
+  function stopScan() {
+    scan.tok++;
+    cancelAnimationFrame(scan.raf);
+    if (scan.stream) { scan.stream.getTracks().forEach((t) => t.stop()); scan.stream = null; }
+    const v = $('#scan-video');
+    if (v) { try { v.pause(); } catch {} v.srcObject = null; }
+  }
+
+  function scanFail(msg) {
+    stopScan();
+    $('#scan-ph').textContent = msg;
+    $('#scan-ph').hidden = false;
+    $('#scan-manual').hidden = false;
+  }
+
+  function openScan() {
+    if (!myPlayer()) { toast('Crie uma conta de jogador para pagar por QR.'); return; }
+    closeSheets();
+    scan.forceJs = false;
+    $('#scan-err').textContent = '';
+    $('#scan-id').value = '';
+    $('#scan-manual').hidden = true;
+    $('#scan-ph').textContent = 'Abrindo a câmera…';
+    $('#scan-ph').hidden = false;
+    openSheetEl('#scan-sheet');
+    startScan();
+  }
+
+  function startScan() {
+    const tok = ++scan.tok;
+    const md = navigator.mediaDevices;
+    if (!window.isSecureContext || !md || !md.getUserMedia) { scanFail('A câmera não está disponível neste navegador. Digite o ID abaixo.'); return; }
+    // getUserMedia é chamado direto do toque do usuário (exigência do Safari).
+    md.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false }).then(async (stream) => {
+      if (tok !== scan.tok) { stream.getTracks().forEach((t) => t.stop()); return; }
+      scan.stream = stream;
+      const v = $('#scan-video');
+      v.muted = true; v.playsInline = true;
+      v.srcObject = stream;
+      // No iPhone, play() pode rejeitar mesmo com a câmera funcionando: não deixa isso derrubar o leitor.
+      try { await v.play(); } catch (err) { console.warn('play():', err && err.name); }
+      if (tok !== scan.tok) return;
+      await new Promise((ok) => { if (v.readyState >= 2) ok(); else { v.addEventListener('loadeddata', ok, { once: true }); setTimeout(ok, 1500); } });
+      if (tok !== scan.tok) return;
+      $('#scan-ph').hidden = true;
+      scan.decode = await pickDecoder();
+      if (tok !== scan.tok) return;
+      scanLoop(tok);
+    }).catch((e) => {
+      if (tok !== scan.tok) return;
+      const n = e && e.name;
+      let msg = `Não foi possível abrir a câmera (${n || 'erro'}). Digite o ID abaixo.`;
+      if (n === 'NotAllowedError' || n === 'SecurityError') msg = 'Sem permissão para usar a câmera. Libere nas configurações do navegador ou digite o ID abaixo.';
+      else if (n === 'NotFoundError' || n === 'OverconstrainedError') msg = 'Nenhuma câmera encontrada. Digite o ID abaixo.';
+      else if (n === 'NotReadableError') msg = 'A câmera está em uso por outro app. Digite o ID abaixo.';
+      else if (e && e.message === 'lib') msg = 'Não foi possível carregar o leitor de QR. Digite o ID abaixo.';
+      scanFail(msg);
+    });
+  }
+
+  async function pickDecoder() {
+    if (!scan.forceJs && 'BarcodeDetector' in window) {
+      try {
+        const formats = await window.BarcodeDetector.getSupportedFormats();
+        if (formats.includes('qr_code')) {
+          const det = new window.BarcodeDetector({ formats: ['qr_code'] });
+          return async (v) => { const r = await det.detect(v); return r.length ? r[0].rawValue : ''; };
+        }
+      } catch {}
+    }
+    await loadLib(CDN_JSQR);
+    const cv = document.createElement('canvas'), cx = cv.getContext('2d', { willReadFrequently: true });
+    return async (v) => {
+      const w = v.videoWidth, h = v.videoHeight;
+      if (!w || !h) return '';
+      const k = Math.min(1, 640 / Math.max(w, h));
+      cv.width = Math.round(w * k); cv.height = Math.round(h * k);
+      cx.drawImage(v, 0, 0, cv.width, cv.height);
+      const img = cx.getImageData(0, 0, cv.width, cv.height);
+      const r = window.jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
+      return r ? r.data : '';
+    };
+  }
+
+  function scanLoop(tok) {
+    const v = $('#scan-video');
+    let last = 0, busy = false;
+    const tick = async (t) => {
+      if (tok !== scan.tok) return;
+      if (!busy && t - last > 140 && v.readyState >= 2) {
+        busy = true; last = t;
+        let raw = '';
+        try { raw = await scan.decode(v); }
+        catch {
+          // BarcodeDetector falhou nesse aparelho: troca para o jsQR.
+          if (!scan.forceJs) { scan.forceJs = true; try { scan.decode = await pickDecoder(); } catch { busy = false; if (tok === scan.tok) scanFail('Não foi possível carregar o leitor de QR. Digite o ID abaixo.'); return; } }
+        }
+        busy = false;
+        if (tok !== scan.tok) return;
+        if (raw) { onScanned(raw); if (tok !== scan.tok) return; }
+      }
+      scan.raf = requestAnimationFrame(tick);
+    };
+    scan.raf = requestAnimationFrame(tick);
+  }
+
+  function onScanned(raw) {
+    const r = parseQr(raw);
+    if (r.build) { payBuild(r.build); return; }
+    if (r.player) { payTo(r.player, r.amount); return; }
+    const now = Date.now();
+    if (raw === scan.badVal && now - scan.badAt < 2800) return;
+    scan.badVal = raw; scan.badAt = now;
+    scanError(r.error);
+    if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
+  }
+
+  /* Abre a folha de transferência já existente, com o destinatário preenchido. O valor e a confirmação continuam com o pagador. */
+  function payTo(p, amount) {
+    if ($('#actions').classList.contains('locked')) { closeSheets(); toast('Não é a sua vez.'); return; }
+    const act = currentActions().find((x) => x.label === 'Transferir');
+    closeSheets();
+    openSheet(act, { from: session.playerId, to: p.id, amount, qr: true });
+    if (navigator.vibrate) navigator.vibrate(40);
+  }
+
+  $('#scan-close').addEventListener('click', closeSheets);
+  $('#scan-manual-btn').addEventListener('click', () => { const m = $('#scan-manual'); m.hidden = !m.hidden; if (!m.hidden) $('#scan-id').focus(); });
+  function scanManualGo() {
+    const v = $('#scan-id').value.trim();
+    if (!v) { scanError('Digite o ID do jogador.'); return; }
+    const r = parseQr(v.toLowerCase().indexOf(QR_PREFIX) === 0 ? v : QR_PREFIX + v);
+    if (r.player) payTo(r.player, r.amount); else if (r.build) payBuild(r.build); else scanError(r.error);
+  }
+  $('#scan-go').addEventListener('click', scanManualGo);
+  $('#scan-id').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); scanManualGo(); } });
+  $('#scan-list').addEventListener('click', () => {
+    if ($('#actions').classList.contains('locked')) { closeSheets(); toast('Não é a sua vez.'); return; }
+    const act = currentActions().find((x) => x.label === 'Transferir');
+    closeSheets();
+    openSheet(act, { from: session.playerId });
+  });
+  // A câmera não pode ficar ligada com o app em segundo plano.
+  document.addEventListener('visibilitychange', () => { if (document.hidden && $('#scan-sheet').classList.contains('open')) closeSheets(); });
+  window.addEventListener('pagehide', stopScan);
+
+  /* ---------- Fechar folhas arrastando para baixo ---------- */
+  document.querySelectorAll('.sheet').forEach((el) => {
+    let y0 = null, dy = 0;
+    el.addEventListener('touchstart', (e) => {
+      if (el.scrollTop > 0 || e.target.closest('input,textarea,select')) { y0 = null; return; }
+      y0 = e.touches[0].clientY; dy = 0; el.style.transition = 'none';
+    }, { passive: true });
+    el.addEventListener('touchmove', (e) => {
+      if (y0 === null) return;
+      dy = Math.max(0, e.touches[0].clientY - y0);
+      el.style.transform = `translateY(${dy}px)`;
+      if (dy > 0 && e.cancelable) e.preventDefault();
+    }, { passive: false });
+    const end = () => {
+      if (y0 === null) return;
+      y0 = null; el.style.transition = '';
+      if (dy > 110) { closeSheets(); } 
+      el.style.transform = '';
+      dy = 0;
+    };
+    el.addEventListener('touchend', end);
+    el.addEventListener('touchcancel', end);
+  });
+
+  /* ---------- Tema claro/escuro ---------- */
+  const themeBtns = document.querySelectorAll('.theme-btn');
+  function applyTheme(t) {
+    document.documentElement.dataset.theme = t;
+    themeBtns.forEach((b) => { b.textContent = t === 'dark' ? '☀️' : '🌙'; });
+    try { localStorage.setItem('bi-theme', t); } catch {}
+  }
+  themeBtns.forEach((b) => b.addEventListener('click', () =>
+    applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark')));
+  let savedTheme = null;
+  try { savedTheme = localStorage.getItem('bi-theme'); } catch {}
+  applyTheme(savedTheme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+
+  /* ---------- Títulos de propriedade ---------- */
+  function rentReceived() {
+    const got = {};
+    state.transactions.forEach((t) => {
+      if (!t.undone && t.kind === 'rent' && t.to && (t.description || '').startsWith('Aluguel:')) got[t.to] = (got[t.to] || 0) + t.amount;
+    });
+    return got;
+  }
+  function renderProps() {
+    const isBank = role() === 'bank', mine = session.playerId, got = rentReceived();
+    const list = [...(state.properties || [])].sort((x, y) => {
+      const sx = x.owner ? (got[x.owner] || 0) : -1, sy = y.owner ? (got[y.owner] || 0) : -1;
+      return sy - sx || x.name.localeCompare(y.name);
+    });
+    const q = ($('#props-search').value || '').trim().toLowerCase();
+    const ownerOf = (p) => !p.owner ? 'banco' : p.owner === mine ? 'você' : (state.players.find((x) => x.id === p.owner)?.name || '');
+    const shown = q ? list.filter((p) => `${p.name} ${ownerOf(p)} ${p.type === 'companhia' ? 'companhia' : 'imóvel'}`.toLowerCase().includes(q)) : list;
+    if (!list.length) {
+      $('#props').innerHTML = `<div class="card"><p class="empty">${isBank ? 'Nenhuma posse ainda. Toque em + Novo título para criar.' : 'Nenhuma posse na partida.'}</p></div>`;
+      return;
+    }
+    if (!shown.length) {
+      $('#props').innerHTML = `<div class="card"><p class="empty">Nenhum título encontrado para "${esc(q)}".</p></div>`;
+      return;
+    }
+    $('#props').innerHTML = shown.map((p) => {
+      const isMine = !!p.owner && p.owner === mine;
+      const owner = !p.owner ? 'Banco' : isMine ? 'Você' : (state.players.find((x) => x.id === p.owner)?.name || '?');
+      const status = p.mortgaged ? 'Hipotecado' : owner;
+      const kind = (p.type === 'companhia' ? 'Companhia · paga pelos dados' : 'Imóvel') + (p.houses ? (p.houses >= 5 ? ' · Hotel' : ' · ' + p.houses + ' casa(s)') : '');
+      return `<button type="button" class="pcard ${!p.owner ? 'free' : isMine ? 'mine' : 'owned'}" data-prop="${p.id}" style="border-left-color:${p.color}">
+        <span class="pcard-top"><b><span class="pcolor" style="background:${p.color}"></span>${esc(p.name)}</b><i class="pill">${esc(status)}</i></span>
+        <span class="pcard-stats">
+          <span><small>Preço</small>${fmt(p.price)}</span>
+          <span><small>Aluguel${p.type === 'companhia' ? ' por dado' : ''}</small>${fmt(p.rent)}</span>
+          <span><small>Hipoteca</small>${fmt(p.mortgage)}</span>
+        </span>
+        <span class="pcard-foot">${kind} · ${p.owner ? 'Dono: ' + esc(owner) + (got[p.owner] ? ' · recebeu ' + fmt(got[p.owner]) : '') : 'Sem dono'}${isBank ? ' · toque para configurar, segure para editar' : ''}</span>
+      </button>`;
+    }).join('');
+  }
+
+  let curProp = null, receiverId = null;
+  function openProp(id) {
+    const pr = state.properties.find((p) => p.id === id);
+    if (!pr) return;
+    curProp = id; receiverId = null;
+    const bank = role() === 'bank', me = session.playerId;
+    const ownerName = !pr.owner ? 'Banco' : pr.owner === me ? 'Você' : (state.players.find((p) => p.id === pr.owner)?.name || '?');
+    $('#ps-title').textContent = pr.name;
+    $('#ps-info').textContent = `Preço ${fmt(pr.price)} · Aluguel ${fmt(pr.rent)} · Hipoteca ${fmt(pr.mortgage)} · Dono: ${ownerName}${pr.mortgaged ? ' · Hipotecado' : ''}`;
+    ['#ps-owner-label', '#ps-owners', '#ps-charge-l', '#ps-hipo', '#ps-del', '#ps-build'].forEach((sel) => { $(sel).hidden = !bank; });
+    if (bank) {
+      $('#ps-build').hidden = !pr.owner || pr.type === 'companhia' || pr.mortgaged || (pr.houses || 0) >= 5;
+      $('#ps-build').textContent = `Construir casa ou hotel (${pr.houses || 0}/5)`;
+    }
+    if (bank) {
+      $('#ps-owners').innerHTML = `<button type="button" class="chip ${!pr.owner ? 'on' : ''}" data-owner="bank">Banco</button>` +
+        state.players.map((p) => `<button type="button" class="chip ${pr.owner === p.id ? 'on' : ''}" data-owner="${p.id}">${esc(p.name)}</button>`).join('');
+      $('#ps-charge').checked = false;
+      $('#ps-hipo').textContent = pr.mortgaged ? `Resgatar hipoteca (${fmt(Math.round(pr.mortgage * 1.1))})` : `Hipotecar (Banco paga ${fmt(pr.mortgage)})`;
+      $('#ps-hipo').disabled = !pr.owner;
+      $('#ps-del').disabled = pr.mortgaged;
+    }
+    const canRent = !bank && !!pr.owner && pr.owner !== me && !pr.mortgaged && pr.rent > 0;
+    $('#ps-rent').hidden = !canRent;
+    if (canRent) $('#ps-rent').textContent = `Pagar aluguel (${fmt(pr.rent)})`;
+    const canTrade = !bank && pr.owner === me && !pr.mortgaged;
+    $('#ps-trade').hidden = !canTrade;
+    if (canTrade) {
+      const others = state.players.filter((p) => p.id !== me);
+      $('#ps-receivers').innerHTML = others.length
+        ? others.map((p) => `<button type="button" class="chip" data-recv="${p.id}">${esc(p.name)}</button>`).join('')
+        : '<span class="hint">Não há outro jogador na sala.</span>';
+      $('#ps-price').value = '';
+    }
+    openSheetEl('#prop-sheet');
+  }
+  $('#props-search').addEventListener('input', renderProps);
+  function setTab(name) {
+    document.querySelectorAll('.tab-pane').forEach((el) => { el.hidden = el.id !== 'tab-' + name; });
+    document.querySelectorAll('.tab').forEach((b) => {
+      const on = b.dataset.tab === name;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-selected', String(on));
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  $('#tabbar').addEventListener('click', (e) => {
+    const b = e.target.closest('.tab'); if (b) setTab(b.dataset.tab);
+  });
+  let pressT = null, pressed = false;
+  const cancelPress = () => { clearTimeout(pressT); pressT = null; };
+  $('#props').addEventListener('pointerdown', (e) => {
+    const b = e.target.closest('[data-prop]');
+    if (!b || role() !== 'bank') return;
+    pressed = false;
+    pressT = setTimeout(() => { pressed = true; if (navigator.vibrate) navigator.vibrate(25); openEdit(b.dataset.prop); }, 550);
+  });
+  ['pointerup', 'pointerleave', 'pointercancel', 'pointermove'].forEach((ev) => $('#props').addEventListener(ev, cancelPress));
+  function openEdit(id) {
+    const pr = state.properties.find((p) => p.id === id);
+    if (!pr) return;
+    curEdit = id;
+    $('#ed-name').value = pr.name;
+    $('#ed-price').value = fmtNum(pr.price);
+    $('#ed-rent').value = fmtNum(pr.rent);
+    $('#ed-mort').value = fmtNum(pr.mortgage);
+    $('#ed-rent').placeholder = pr.type === 'companhia' ? 'Valor por dado (R$)' : 'Aluguel';
+    $('#ed-error').textContent = '';
+    closeSheets();
+    openSheetEl('#edit-form');
+  }
+  let curEdit = null;
+  ['#ed-price', '#ed-rent', '#ed-mort'].forEach((sel) => $(sel).addEventListener('input', (e) => { e.target.value = fmtNum(digits(e.target.value).slice(0, 9)); }));
+  $('#edit-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const err = $('#ed-error'); err.textContent = '';
+    const name = $('#ed-name').value.trim(), price = numOf('#ed-price');
+    const rent = numOf('#ed-rent') || 0, mortgage = numOf('#ed-mort') || 0;
+    if (!name) { err.textContent = 'Dê um nome ao título.'; return; }
+    if (!price) { err.textContent = 'Informe o preço.'; return; }
+    socket.emit('prop:update', { id: curEdit, name, price, rent, mortgage }, (res) => {
+      if (!res.ok) { err.textContent = res.error; return; }
+      closeSheets(); toast('Título atualizado.');
+    });
+  });
+  $('#props').addEventListener('click', (e) => {
+    if (pressed) { pressed = false; return; }
+    const b = e.target.closest('[data-prop]');
+    if (b) openProp(b.dataset.prop);
+  });
+  $('#ps-receivers').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-recv]'); if (!b) return;
+    receiverId = b.dataset.recv;
+    document.querySelectorAll('#ps-receivers .chip').forEach((x) => x.classList.toggle('on', x === b));
+  });
+  $('#ps-price').addEventListener('input', (e) => { e.target.value = fmtNum(digits(e.target.value).slice(0, 9)); });
+  $('#ps-trade-ok').addEventListener('click', () => {
+    if (!curProp) return;
+    if (!receiverId) return toast('Escolha quem vai receber.');
+    const price = numOf('#ps-price') || 0;
+    socket.emit('prop:trade', { id: curProp, to: receiverId, price }, (res) => {
+      if (!res.ok) return toast(res.error);
+      closeSheets(); toast('Proposta de troca enviada.');
+    });
+  });
+  $('#ps-rent').addEventListener('click', () => { if (curProp) openRent(curProp); });
+  $('#ps-build').addEventListener('click', () => {
+    const pr = state.properties.find((p) => p.id === curProp);
+    if (!pr) return;
+    closeSheets();
+    $('#bd-title').textContent = 'Propor construção · ' + pr.name;
+    $('#bd-info').textContent = `Casas: ${pr.houses || 0}/5 · Aluguel atual ${fmt(pr.rent)}. Informe o custo (vai para o Banco, cobrado do dono) e o novo aluguel.`;
+    $('#bd-cost').value = ''; $('#bd-rent').value = ''; $('#bd-error').textContent = ''; $('#bd-qr').value = '1';
+    openSheetEl('#build-form');
+  });
+  const bdSend = (type) => {
+    const err = $('#bd-error'); err.textContent = '';
+    const rent = numOf('#bd-rent');
+    const cost = numOf('#bd-cost') || 0;
+    if (type === 'prop:build' && isNaN(rent)) { err.textContent = 'Informe o novo aluguel.'; return; }
+    if (type === 'prop:demolish' && isNaN(rent)) { err.textContent = 'Informe o aluguel depois de demolir.'; return; }
+    const propId = curProp;
+    const useQr = type === 'prop:build' && $('#bd-qr').value === '1';
+    const payload = { id: propId, rent: isNaN(rent) ? 0 : rent, cost };
+    if (type === 'prop:build') payload.qr = useQr;
+    socket.emit(type, payload, (res) => {
+      if (!res.ok) { err.textContent = res.error; return; }
+      if (useQr) {
+        const pend = [...state.pending].reverse().find((r) => r.type === 'build' && r.propId === propId);
+        if (pend) { showBuildQr(pend); return; }
+      }
+      closeSheets(); toast(type === 'prop:build' ? 'Proposta de construção enviada ao dono.' : 'Construção demolida.');
+    });
+  };
+  /* Abre na hora o QR da construção para o Banco mostrar ao dono. */
+  function showBuildQr(r) {
+    closeSheets();
+    $('#qr-form').hidden = true;
+    $('#qr-view').hidden = false;
+    $('#qr-err').textContent = '';
+    $('#qr-name').textContent = 'Construção · ' + r.description;
+    $('#qr-id').textContent = 'Cobrança de ' + (r.amount ? fmt(r.amount) : 'sem custo') + ' · dono: ' + r.fromName;
+    $('#qr-box').innerHTML = '';
+    openSheetEl('#qr-sheet');
+    loadLib(CDN_QR).then(() => {
+      if (!$('#qr-sheet').classList.contains('open')) return;
+      $('#qr-box').innerHTML = '';
+      new window.QRCode($('#qr-box'), { text: QR_BUILD + r.id, width: 256, height: 256, colorDark: '#000000', colorLight: '#ffffff', correctLevel: window.QRCode.CorrectLevel.M });
+    }).catch(() => { $('#qr-err').textContent = 'Não foi possível gerar o QR agora.'; });
+  }
+  $('#bd-build').addEventListener('click', () => bdSend('prop:build'));
+  $('#bd-demolish').addEventListener('click', () => bdSend('prop:demolish'));
+
+  /* ---------- Turnos ---------- */
+  let tnOrder = [];
+  function renderTurns() {
+    const t = state.turns, box = $('#turnbox');
+    const order = t && t.enabled ? t.order.filter((id) => state.players.some((p) => p.id === id)) : [];
+    if (!order.length) { box.innerHTML = ''; return; }
+    const curId = order[t.current % order.length];
+    const cur = state.players.find((p) => p.id === curId);
+    const mine = curId === session.playerId, bank = role() === 'bank';
+    box.innerHTML = `<div class="turn-card ${mine ? 'mine' : ''}">
+      <p>${mine ? 'Sua vez' : 'Vez de ' + esc(cur ? cur.name : '?')}</p>
+      ${mine || bank ? '<button id="turn-next" class="turn-next" type="button">Próximo</button>' : ''}
+    </div>`;
+  }
+  $('#turnbox').addEventListener('click', (e) => {
+    if (e.target.closest('#turn-next')) socket.emit('turn:next', (res) => { if (!res.ok) toast(res.error); });
+  });
+  $('#m-turns').addEventListener('click', () => {
+    closeSheets();
+    $('#tn-on').checked = !!(state.turns && state.turns.enabled);
+    tnOrder = (state.turns && state.turns.order || []).filter((id) => state.players.some((p) => p.id === id));
+    renderTnList();
+    openSheetEl('#turn-sheet');
+  });
+  function renderTnList() {
+    $('#tn-list').innerHTML = state.players.map((p) => {
+      const i = tnOrder.indexOf(p.id);
+      return `<button type="button" class="chip ${i >= 0 ? 'on' : ''}" data-tn="${p.id}">${i >= 0 ? (i + 1) + 'º ' : ''}${esc(p.name)}</button>`;
+    }).join('') || '<span class="hint">Nenhum jogador na sala.</span>';
+  }
+  $('#tn-list').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-tn]'); if (!b) return;
+    const id = b.dataset.tn, i = tnOrder.indexOf(id);
+    if (i >= 0) tnOrder.splice(i, 1); else tnOrder.push(id);
+    renderTnList();
+  });
+  $('#tn-save').addEventListener('click', () => {
+    const enabled = $('#tn-on').checked;
+    const order = [...tnOrder, ...state.players.map((p) => p.id).filter((id) => !tnOrder.includes(id))];
+    socket.emit('turns:set', { enabled, order: enabled ? order : tnOrder }, (res) => {
+      if (!res.ok) return toast(res.error);
+      closeSheets(); toast(enabled ? 'Turnos ativados.' : 'Turnos desativados.');
+    });
+  });
+  $('#ps-owners').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-owner]'); if (!b || !curProp) return;
+    socket.emit('prop:assign', { id: curProp, owner: b.dataset.owner, charge: $('#ps-charge').checked }, (res) => {
+      if (!res.ok) return toast(res.error);
+      closeSheets(); toast('Título atualizado.');
+    });
+  });
+  $('#ps-hipo').addEventListener('click', () => {
+    if (!curProp) return;
+    socket.emit('prop:mortgage', { id: curProp }, (res) => {
+      if (!res.ok) return toast(res.error);
+      closeSheets(); toast('Hipoteca atualizada.');
+    });
+  });
+  $('#ps-del').addEventListener('click', () => {
+    if (!curProp || !confirm('Remover este título da partida?')) return;
+    socket.emit('prop:delete', { id: curProp }, (res) => {
+      if (!res.ok) return toast(res.error);
+      closeSheets(); toast('Título removido.');
+    });
+  });
+  $('#btn-new-prop').addEventListener('click', () => {
+    closeSheets();
+    ['#p-name', '#p-price', '#p-mort', '#p-rent'].forEach((i) => { $(i).value = ''; });
+    pColor = PALETTE[1]; pType = 'imovel'; renderPForm();
+    $('#p-error').textContent = '';
+    openSheetEl('#prop-form');
+  });
+  $('#p-price').addEventListener('input', (e) => { e.target.value = fmtNum(digits(e.target.value).slice(0, 9)); });
+  $('#p-mort').addEventListener('input', (e) => { e.target.value = fmtNum(digits(e.target.value).slice(0, 9)); });
+  $('#prop-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const err = $('#p-error'); err.textContent = '';
+    const name = $('#p-name').value.trim(), price = numOf('#p-price'), mortgage = numOf('#p-mort') || 0;
+    if (!name) { err.textContent = 'Dê um nome ao título.'; return; }
+    if (!price) { err.textContent = 'Informe o preço.'; return; }
+    const rent = numOf('#p-rent') || 0;
+    socket.emit('prop:create', { name, price, mortgage, rent, type: pType, color: pColor }, (res) => {
+      if (!res.ok) { err.textContent = res.error; return; }
+      closeSheets(); toast('Título criado.');
+    });
+  });
+
+  /* ---------- Pagar aluguel ---------- */
+  let rsTitle = null, rsDice = null;
+  function openRent(preId) {
+    const me = session.playerId;
+    const cands = state.properties.filter((p) => p.owner && p.owner !== me && !p.mortgaged && p.rent > 0);
+    if (!cands.length) return toast('Nenhum título de outro jogador para pagar aluguel.');
+    closeSheets();
+    rsTitle = preId && cands.some((p) => p.id === preId) ? preId : null;
+    rsDice = null;
+    $('#rs-titles').innerHTML = cands.map((p) =>
+      `<button type="button" class="chip" data-rt="${p.id}" style="border-left:6px solid ${p.color}">${esc(p.name)}</button>`).join('');
+    $('#rs-dice').innerHTML = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => `<button type="button" class="chip" data-rd="${n}">${n}</button>`).join('');
+    $('#rs-error').textContent = '';
+    renderRent();
+    openSheetEl('#rent-sheet');
+  }
+  function renderRent() {
+    const pr = state.properties.find((p) => p.id === rsTitle);
+    document.querySelectorAll('#rs-titles .chip').forEach((c) => c.classList.toggle('on', c.dataset.rt === rsTitle));
+    document.querySelectorAll('#rs-dice .chip').forEach((c) => c.classList.toggle('on', +c.dataset.rd === rsDice));
+    $('#rs-dice-wrap').hidden = !(pr && pr.type === 'companhia');
+    if (!pr) { $('#rs-info').textContent = 'Escolha o título onde você caiu.'; $('#rs-total').textContent = ''; return; }
+    const owner = state.players.find((p) => p.id === pr.owner);
+    $('#rs-info').textContent = `Dono: ${owner ? owner.name : '?'}` + (pr.type === 'companhia' ? ` · ${fmt(pr.rent)} por dado` : '');
+    if (pr.type === 'companhia') {
+      $('#rs-total').textContent = rsDice ? `Total: ${fmt(rsDice * pr.rent)} (${rsDice} dados × ${fmt(pr.rent)})` : 'Escolha quantos dados saíram';
+    } else {
+      $('#rs-total').textContent = `Total: ${fmt(pr.rent)}`;
+    }
+  }
+  $('#rs-titles').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-rt]'); if (!b) return;
+    rsTitle = b.dataset.rt; rsDice = null; renderRent();
+  });
+  $('#rs-dice').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-rd]'); if (!b) return;
+    rsDice = +b.dataset.rd; renderRent();
+  });
+  $('#rs-ok').addEventListener('click', () => {
+    const err = $('#rs-error'); err.textContent = '';
+    if (!rsTitle) { err.textContent = 'Escolha o título.'; return; }
+    const pr = state.properties.find((p) => p.id === rsTitle);
+    if (pr && pr.type === 'companhia' && !rsDice) { err.textContent = 'Escolha quantos dados saíram.'; return; }
+    socket.emit('prop:rent', { id: rsTitle, dice: rsDice || 0 }, (res) => {
+      if (!res.ok) { err.textContent = res.error; return; }
+      closeSheets(); flash('Aluguel pago', 'Obrigado!');
+    });
+  });
+
+  /* ---------- Cores e tipo do título ---------- */
+  const PALETTE = ['#8B5A2B', '#8ED8F8', '#D93A96', '#F7941D', '#ED1B24', '#FFE14D', '#1FB25A', '#0072BB', '#222222', '#9B59B6'];
+  let pColor = PALETTE[1], pType = 'imovel';
+  function renderPForm() {
+    $('#p-colors').innerHTML = PALETTE.map((c) => `<button type="button" class="swatch ${c === pColor ? 'on' : ''}" data-col="${c}" style="background:${c}" aria-label="Cor ${c}"></button>`).join('');
+    document.querySelectorAll('#p-types .chip').forEach((x) => x.classList.toggle('on', x.dataset.type === pType));
+    $('#p-rent').placeholder = pType === 'companhia' ? 'Valor por dado (R$)' : 'Aluguel (opcional)';
+  }
+  $('#p-colors').addEventListener('click', (e) => { const b = e.target.closest('[data-col]'); if (b) { pColor = b.dataset.col; renderPForm(); } });
+  $('#p-types').addEventListener('click', (e) => { const b = e.target.closest('[data-type]'); if (b) { pType = b.dataset.type; renderPForm(); } });
+
+  document.querySelectorAll('input[inputmode="numeric"]').forEach((el) => {
+    el.addEventListener('input', () => { el.value = fmtNum(digits(el.value).slice(0, 9)); });
+  });
+
+  /* ---------- Início ---------- */
+  const qs = new URLSearchParams(location.search).get('sala');
+  if (qs) { $('#code').value = qs.toUpperCase().replace(/[^A-Z0-9]/g, ''); peek(); }
+  showScreen(session ? 'boot' : 'join');
+  updateRole();
+})();
+
+</script>
+</body>
+</html>
